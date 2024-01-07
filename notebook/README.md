@@ -6,9 +6,14 @@ TODO - Add pre-requisites here
 
 TODO - Add PyTorch installation instructions here
 
+Running the pytorch container: `docker run --gpus all --volume ./notebook/:/app/project/ -p 8888:8888 --rm -d -it  hackxit/pytorch-notebo
+ok:extension`
+
 ## Tensorflow
 
 TODO - Add Tensorflow installation instructions here
+
+Running the tensorflow container: `docker run --gpus all --volume ./notebook/:/tf/project/ -p 8888:8888 --rm -d -it  tensorflow/tensorflow:nightly-gpu-jupyter`
 
 # Model
 
