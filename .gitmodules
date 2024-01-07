@@ -1,0 +1,6 @@
+[submodule "lvgl_ui_randomizer"]
+	path = ui_randomizer
+	url = git@github.com:HackXIt/lvgl_ui_randomizer.git
+[submodule "lvgl_random_ui_generator"]
+	path = ui_generator
+	url = https://github.com/HackXIt/lvgl_random_ui_generator
