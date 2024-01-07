@@ -15,7 +15,15 @@ The model is able to detect these widgets in a variety of different contexts, in
 
 - TODO
 
-## The UI generator
+# Note
+
+This project was created for my bachelor thesis at the University of Applied Sciences Technikum Vienna.
+
+All relevant documentation about the project can be found in the [thesis](thesis.pdf) under the `doc` folder.
+
+The project is still a work in progress. The model is not yet trained and the UI generator is not yet fully functional.
+
+## The LVGL UI generator
 
 The UI generator is a modification of the LVGL simulator for PC to generate synthetic UIs. 
 It is based on the [lv_port_pc_vscode](https://github.com/lvgl/lv_port_pc_vscode) since that is the IDE I use and also the only one I could get to work with my poor generator code.
@@ -32,8 +40,9 @@ TODO ... (add usage instructions for binary)
 
 ### Known issues
 
-- The generator currently always will crash in a SEGFAULT when exiting the program. I have not yet found a way to fix it. For now it is fine since it correctly generates the screenshot and the label file. The crash occurs during de-initialization of the UI.
+- The generator currently will always crash in a SEGFAULT when exiting the program. I have not yet found a way to fix it. For now it is fine since it correctly generates the screenshot and the label file. The crash occurs during de-initialization of the UI.
 - Due to the failed de-initialization, the generator will leak memory and sometimes will fail on multiple runs. Retrying usually fixes the issue.
+- Due to memory issues, screenshots larger than 400x400 pixels will cause the generator to crash. This is a known issue with the generator and I have not yet found a way to fix it.
 
 ## The UI randomizer
 
@@ -41,7 +50,7 @@ The UI randomizer is a python script that leverages the binary of the UI generat
 
 It is helpful in making the generator much more user-friendly, since it can be used to generate a large number of UIs with a single command, without having to repeatedly run the generator manually.
 
-Since the label data from the generator still needs to be normalized, the randomizer will pre-process the files and place the data in the correct folder structure for training the model.
+Since the label data from the generator still needs to be normalized, the randomizer will pre-process the annotation files and place the data in the correct folder structure for training the model.
 
 ### Usage
 
@@ -58,3 +67,17 @@ The model is a YOLOv4 object detection model, trained on the RICO dataset and fi
 Code can be found in the `notebook` folder.
 
 TODO ... (add more)
+
+# Milestones
+
+- [x] Create UI generator
+- [x] Create UI randomizer
+- [ ] Create model
+- [ ] Make model predict the pre-defined widget list
+
+# Feature roadmap
+
+- [ ] Add widget customization in generator (color, size, etc.)
+- [ ] Add UI presets in generator (e.g. login screen, settings screen, etc.)
+- [ ] Add more widgets
+- [ ] Add 
