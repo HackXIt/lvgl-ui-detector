@@ -14,5 +14,9 @@
             "**/Thumbs.db": true,
             "**/.vscode/.history": true
         }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": []
     }
 }
