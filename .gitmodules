@@ -6,4 +6,4 @@
 	url = git@github.com:HackXIt/lvgl_ui_generator.git
 [submodule "notebook/baseline"]
 	path = baseline
-	url = git@github.com:chenjshnn/Object-Detection-for-Graphical-User-Interface.git
+	url = git@github.com:HackXIt/Object-Detection-for-Graphical-User-Interface.git
