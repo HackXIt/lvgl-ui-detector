@@ -1,0 +1,4 @@
+classes=6
+train=/app/project/tmp/data/train.txt
+valid=/app/project/tmp/data/val.txt
+names=/app/project/tmp/data/classes.names
