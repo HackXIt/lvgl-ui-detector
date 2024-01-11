@@ -5,5 +5,5 @@
 	path = lvgl_ui_generator
 	url = git@github.com:HackXIt/lvgl_ui_generator.git
 [submodule "notebook/baseline"]
-	path = baseline
+	path = yolov3_baseline_project
 	url = git@github.com:chenjshnn/Object-Detection-for-Graphical-User-Interface.git
