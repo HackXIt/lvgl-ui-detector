@@ -1,0 +1,41 @@
+{
+    "folders": [
+        {
+            "name": "UI Detector",
+            "path": ".."
+        },
+        {
+            "name": "LVGL UI Generator",
+            "path": "../lvgl_ui_generator"
+        },
+        {
+            "name": "YOLOv3 Baseline Project",
+            "path": "../yolov3_baseline_project"
+        },
+        {
+            "name": "UI Randomizer",
+            "path": "../ui_randomizer"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/.git": true,
+            "**/.svn": true,
+            "**/.hg": true,
+            "**/CVS": true,
+            "**/.DS_Store": true,
+            "**/Thumbs.db": true,
+            "**/.vscode/.history/": true,
+            "lvgl_ui_generator": true,
+            "yolov3_baseline_project": true,
+            "ui_randomizer": true,
+        },
+        "makefile.makeDirectory": "${workspaceFolder}/lvgl_ui_generator",
+        "makefile.extensionOutputFolder": "${workspaceFolder}/lvgl_ui_generator/build",
+        "makefile.makefilePath": "${workspaceFolder}/lvgl_ui_generator/Makefile",
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": []
+    }
+}
