@@ -1,7 +1,7 @@
 FROM ultralytics/ultralytics:latest
 
-RUN pip install --no-cache-dir notebook
-RUN pip install jupyterthemes
+RUN pip install --no-cache-dir jupyterlab jupyterthemes
+# NOTE: https://github.com/dunovank/jupyter-themes
 # -fs 115: Code font size
 # -nfs 125: Notebook menu font size
 # -tfs 115: Markdown font size
@@ -15,7 +15,7 @@ RUN pip install jupyterthemes
 # -T: Display toolbar under menu tab (save, add/delete/move cell, stop/restart kernel, etc.)
 # -N: Display file name on laptop screen
 
-RUN jt -t onedork -f roboto -fs 14
+RUN jt -t onedork -f firacode -nf robotosans -fs 14 -nfs 14
 
 ENV WORKSPACE_DIR /workspace
 ENV ULTRALYTICS_DIR /usr/src/ultralytics
@@ -29,4 +29,5 @@ RUN ln -s ${ULTRALYTICS_DIR} ${WORKSPACE_DIR}/ultralytics
 
 EXPOSE 8888
 
-CMD ["jupyter", "notebook", "--ip='*'", "--port=8888", "--no-browser", "--allow-root"]
+ENTRYPOINT [ "jupyter", "lab", "--allow-root", "--no-browser", "--NotebookApp.allow_origin='*'", "--NotebookApp.allow_remote_access=True", "--NotebookApp.ip='*'" ]
+CMD [ "" ]
