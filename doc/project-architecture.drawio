@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-01-21T16:14:51.090Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0" etag="DqpkGD5wSM1rlOvZdhIp" version="22.1.21" type="github" pages="4">
+<mxfile host="app.diagrams.net" modified="2024-01-21T16:17:49.320Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0" etag="NgyG94_jlkthSj_eu8gF" version="22.1.21" type="github" pages="4">
   <diagram name="Overview" id="PMV152I8gQXKeaIALvPA">
     <mxGraphModel dx="538" dy="716" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
@@ -358,7 +358,7 @@
         <mxCell id="aDfMpOBGCI-HYklWgJ5V-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;curved=1;" edge="1" parent="1" source="aDfMpOBGCI-HYklWgJ5V-10" target="aDfMpOBGCI-HYklWgJ5V-3">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="aDfMpOBGCI-HYklWgJ5V-12" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 12px;&quot;&gt;Install jupyterlab&lt;/font&gt;&lt;font face=&quot;4gtaO85qTYkJR_dHc6cB&quot;&gt;&lt;br&gt;+ extensions&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="aDfMpOBGCI-HYklWgJ5V-11">
+        <mxCell id="aDfMpOBGCI-HYklWgJ5V-12" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 12px;&quot;&gt;Install jupyterlab&lt;/font&gt;&lt;font face=&quot;4gtaO85qTYkJR_dHc6cB&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Lucida Console&quot;&gt;+ extensions&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="aDfMpOBGCI-HYklWgJ5V-11">
           <mxGeometry x="-0.1305" y="-3" relative="1" as="geometry">
             <mxPoint x="44" y="-32" as="offset" />
           </mxGeometry>
@@ -369,13 +369,13 @@
         <mxCell id="aDfMpOBGCI-HYklWgJ5V-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="aDfMpOBGCI-HYklWgJ5V-14" target="aDfMpOBGCI-HYklWgJ5V-27">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="aDfMpOBGCI-HYklWgJ5V-14" value="localhost:8888" style="shape=mxgraph.cisco.directors.localdirector;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;" vertex="1" parent="1">
+        <mxCell id="aDfMpOBGCI-HYklWgJ5V-14" value="&lt;font face=&quot;Lucida Console&quot;&gt;localhost:8888&lt;/font&gt;" style="shape=mxgraph.cisco.directors.localdirector;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;" vertex="1" parent="1">
           <mxGeometry x="530" y="870" width="78" height="51" as="geometry" />
         </mxCell>
         <mxCell id="aDfMpOBGCI-HYklWgJ5V-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="aDfMpOBGCI-HYklWgJ5V-16" target="aDfMpOBGCI-HYklWgJ5V-29">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="aDfMpOBGCI-HYklWgJ5V-16" value="localhost:6006" style="shape=mxgraph.cisco.directors.localdirector;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;" vertex="1" parent="1">
+        <mxCell id="aDfMpOBGCI-HYklWgJ5V-16" value="&lt;font face=&quot;Lucida Console&quot;&gt;localhost:6006&lt;/font&gt;" style="shape=mxgraph.cisco.directors.localdirector;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;" vertex="1" parent="1">
           <mxGeometry x="530" y="957" width="78" height="51" as="geometry" />
         </mxCell>
         <mxCell id="aDfMpOBGCI-HYklWgJ5V-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=1;" edge="1" parent="1" source="aDfMpOBGCI-HYklWgJ5V-19" target="aDfMpOBGCI-HYklWgJ5V-20">
