@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-01-21T14:30:50.392Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0" etag="BSWlYuTtfHSsnupFF1Dh" version="22.1.21" type="github" pages="4">
+<mxfile host="app.diagrams.net" modified="2024-01-21T14:41:11.923Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0" etag="6vxe6N373L136GkJFLSu" version="22.1.21" type="github" pages="4">
   <diagram name="Overview" id="PMV152I8gQXKeaIALvPA">
     <mxGraphModel dx="941" dy="1253" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
@@ -95,7 +95,7 @@
         <mxCell id="5IaU9lcffaFXkDmT9sVI-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=1;fontFamily=Lucida Console;" edge="1" parent="1" source="5IaU9lcffaFXkDmT9sVI-1" target="veaWCtDNVJpHXdZxBmAT-1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="5IaU9lcffaFXkDmT9sVI-1" value="Design files" style="shape=parallelogram;html=1;strokeWidth=2;perimeter=parallelogramPerimeter;whiteSpace=wrap;rounded=1;arcSize=12;size=0.23;fontFamily=Lucida Console;" vertex="1" parent="1">
+        <mxCell id="5IaU9lcffaFXkDmT9sVI-1" value="Design file" style="shape=parallelogram;html=1;strokeWidth=2;perimeter=parallelogramPerimeter;whiteSpace=wrap;rounded=1;arcSize=12;size=0.23;fontFamily=Lucida Console;" vertex="1" parent="1">
           <mxGeometry x="160" y="860" width="160" height="50" as="geometry" />
         </mxCell>
         <mxCell id="5IaU9lcffaFXkDmT9sVI-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=1;fontFamily=Lucida Console;" edge="1" parent="1" source="5IaU9lcffaFXkDmT9sVI-5" target="veaWCtDNVJpHXdZxBmAT-1">
@@ -128,8 +128,8 @@
             <mxPoint x="700" y="417" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="5IaU9lcffaFXkDmT9sVI-18" value="&lt;h1&gt;LVGL UI Generator&lt;br&gt;&lt;/h1&gt;&lt;p&gt;Produces one UI screenshot with a corresponding label file.&lt;br&gt;It produces randomly chosen widgets from the provided list in the provided layout.&lt;br&gt;&lt;i&gt;(none, flex or grid)&lt;/i&gt;&lt;/p&gt;&lt;p&gt;This is done by creating an LVGL window with fixed size and placing the widgets inside a container of the desired image size. Then a screenshot of the container is made, producing an image with the desired size.&lt;br&gt;The label file is created by using the LVGL information during the generation process.&lt;br&gt;&lt;/p&gt;" style="text;html=1;strokeColor=default;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;dashed=1;dashPattern=12 12;fontFamily=Lucida Console;" vertex="1" parent="1">
-          <mxGeometry x="360" y="665" width="320" height="260" as="geometry" />
+        <mxCell id="5IaU9lcffaFXkDmT9sVI-18" value="&lt;h1&gt;LVGL UI Generator&lt;br&gt;&lt;/h1&gt;&lt;p&gt;Produces one UI screenshot with a corresponding label file.&lt;br&gt;It currently creates randomly chosen widgets from the provided list in the provided layout.&lt;br&gt;&lt;i&gt;(none, flex or grid)&lt;/i&gt;&lt;/p&gt;&lt;p&gt;This is done by creating an LVGL window with fixed size and placing the widgets inside a container of the desired image size. Then a screenshot of the container is made, producing an image with the desired size.&lt;br&gt;The label file is created by using the LVGL information during the generation process.&lt;br&gt;&lt;/p&gt;" style="text;html=1;strokeColor=default;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;dashed=1;dashPattern=12 12;fontFamily=Lucida Console;" vertex="1" parent="1">
+          <mxGeometry x="360" y="665" width="320" height="265" as="geometry" />
         </mxCell>
         <mxCell id="5IaU9lcffaFXkDmT9sVI-22" value="" style="group" vertex="1" connectable="0" parent="1">
           <mxGeometry x="710" y="600" width="207" height="170" as="geometry" />
