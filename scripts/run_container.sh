@@ -17,9 +17,12 @@ if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
 else
     # Container does not exist, create a new one
     docker run -d \
+        --shm-size=2g \
         --gpus all \
         --name $container_name \
         -v "$mount_dir:/workspace/project/" \
         -p $port:8888 \
-        $image
+        -p 6006:6006 \
+        $image \
+        # "--NotebookApp.password=lvgl-ui-detector" 
 fi
