@@ -1,6 +1,9 @@
 FROM ultralytics/ultralytics:latest
 
+# Install jupyterlab
 RUN pip install --no-cache-dir jupyterlab jupyterthemes
+# Install jupyterlab extensions
+RUN pip install --no-cache-dir jupyter-ai-chatgpt jupyterlab-git jupyterlab-github
 # NOTE: https://github.com/dunovank/jupyter-themes
 # -fs 115: Code font size
 # -nfs 125: Notebook menu font size
@@ -18,16 +21,20 @@ RUN pip install --no-cache-dir jupyterlab jupyterthemes
 RUN jt -t onedork -f firacode -nf robotosans -fs 14 -nfs 14
 
 ENV WORKSPACE_DIR /workspace
+ENV PROJECT_DIR ${WORKSPACE_DIR}/project
 ENV ULTRALYTICS_DIR /usr/src/ultralytics
 # Mount the ultralytics directory to the host as anonymous volume
 VOLUME $ULTRALYTICS_DIR
 # Set the working directory to the ultralytics directory
-WORKDIR $WORKSPACE_DIR
+WORKDIR $PROJECT_DIR
 
 # Create a symbolic link to the ultralytics directory
-RUN ln -s ${ULTRALYTICS_DIR} ${WORKSPACE_DIR}/ultralytics
+RUN ln -s ${ULTRALYTICS_DIR} ${WORKSPACE_DIR}/ultralytics-src
 
+# Expose jupyter port
 EXPOSE 8888
+# Expose tensorboard port
+EXPOSE 6006
 
 ENTRYPOINT [ "jupyter", "lab", "--allow-root", "--no-browser", "--NotebookApp.allow_origin='*'", "--NotebookApp.allow_remote_access=True", "--NotebookApp.ip='*'" ]
 CMD [ "" ]
