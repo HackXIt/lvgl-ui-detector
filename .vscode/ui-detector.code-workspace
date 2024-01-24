@@ -15,6 +15,10 @@
         {
             "name": "UI Randomizer",
             "path": "../ui_randomizer"
+        },
+        {
+            "name": "Bachelor Thesis",
+            "path": "../paper"
         }
     ],
     "settings": {
@@ -29,6 +33,7 @@
             "lvgl_ui_generator": true,
             "yolov3_baseline_project": true,
             "ui_randomizer": true,
+            "paper": true
         },
         "makefile.makeDirectory": "${workspaceFolder}/lvgl_ui_generator",
         "makefile.extensionOutputFolder": "${workspaceFolder}/lvgl_ui_generator/build",

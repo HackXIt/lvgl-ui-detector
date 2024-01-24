@@ -7,3 +7,6 @@
 [submodule "notebook/baseline"]
 	path = yolov3_baseline_project
 	url = git@github.com:HackXIt/Object-Detection-for-Graphical-User-Interface.git
+[submodule "paper"]
+	path = paper
+	url = ../ui-detector-paper
