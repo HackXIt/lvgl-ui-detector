@@ -17,7 +17,7 @@ The model is able to detect these widgets in a variety of different contexts, in
 
 - (work in progress)
 
-# Creator's Note
+# Author's Note
 
 This project was created for my bachelor thesis at the [University of Applied Sciences Technikum Vienna](https://www.technikum-wien.at/en/).
 
