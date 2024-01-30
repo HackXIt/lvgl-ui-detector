@@ -135,6 +135,16 @@ Other notebooks are still a work in progress and will be updated later but serve
 
 ----
 
+## Docker image
+
+A docker image is provided for development purposes. It is derived from the official [Ultralytics docker image](https://hub.docker.com/r/ultralytics/ultralytics) and contains all necessary dev-dependencies for the project _(i.e. JupyterLab)_.
+
+The image can be built using the provided `Dockerfile` in the root directory of the repository. Additionally, there's a [run_container.sh script](./scripts/run_container.sh) provided for convenience in the [scripts](./scripts/) folder.
+
+The script and image currently only serve my development purposes and are not taking any other needs into account.
+
+----
+
 # Milestones
 
 - [x] Create UI generator
