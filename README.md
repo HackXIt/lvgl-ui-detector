@@ -1,4 +1,4 @@
-# lvgl-ui-detector
+# LVGL UI Detector
 
 This machine learning project is a user interface widget detector for the [LVGL](https://lvgl.io/) framework. The base is the [YOLOv8 model](https://github.com/ultralytics/ultralytics), trained on the synthesized dataset from the programs/scripts in this repository.
 
@@ -34,19 +34,19 @@ It is based on the [lv_port_pc_vscode](https://github.com/lvgl/lv_port_pc_vscode
 
 When launched with the proper arguments, it will open a window with a single container widget of the provided size placed inside. After rendering the UI, it will generate a screenshot of the container and save it to the provided path. It will also generate a text file with the bounding boxes of the placed widgets.
 
-Keep in mind, that the provided path must be prefixed with `/` as that is the local file system indicator for LVGl, otherwise it doesn't know where to save the file (i.e. which file driver to use). Also the generated label file uses the widget name instead of a class id and the bounding box is in pixel values. This is by design, as it is far easier to perform the proper normalization and class ID replacement in python.
+Keep in mind, that the provided path must be prefixed with `/` as that is the local file system indicator for LVGL, otherwise it doesn't know where to save the file (i.e. which file driver to use). Also the generated label file uses the widget name instead of a class id and the bounding box is in pixel values. This is by design, as it is far easier to perform the proper normalization and class ID replacement in python.
 
 The generated UI places randomly chosen widgets from the provided widget list. The supported widget list is currently limited to the following: 
 _(the names to the left are valid arguments for the generator, the right ones are the LVGL widget names)_
-    - `button` -> `lv_btn`
-    - `switch` -> `lv_switch`
-    - `slider` -> `lv_slider`
-    - `checkbox` -> `lv_checkbox`	
-    - `label` -> `lv_label`
-    - `progressbar` -> `lv_bar`
+- `button` -> `lv_btn`
+- `switch` -> `lv_switch`
+- `slider` -> `lv_slider`
+- `checkbox` -> `lv_checkbox`	
+- `label` -> `lv_label`
+- `progressbar` -> `lv_bar`
 
 The generated label `*.txt` file follows the YOLO format for the bounding boxes. 
-*(YOLO format: `<label> <x_center> <y_center> <width> <height>`, values are in pixels)* 
+_(YOLO format: `<label> <x_center> <y_center> <width> <height>`, values are in pixels)_
 This information can later be used to build a dataset for training the model when processed with the UI randomizer.
 
 ### Usage
