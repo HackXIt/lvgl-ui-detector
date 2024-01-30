@@ -1,0 +1,11 @@
+names:
+  0: lv_btn
+  1: lv_checkbox
+  2: lv_label
+  3: lv_slider
+  4: lv_switch
+  5: lv_bar
+path: /workspace/project/tmp/custom
+test: images/test
+train: images/train
+val: images/val
