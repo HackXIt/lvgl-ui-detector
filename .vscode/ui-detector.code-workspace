@@ -9,6 +9,10 @@
             "path": "../lvgl_ui_generator"
         },
         {
+            "name": "LVGL UI Generator v2",
+            "path": "../lvgl_ui_generator_v2"
+        },
+        {
             "name": "YOLOv3 Baseline Project",
             "path": "../yolov3_baseline_project"
         },
@@ -31,6 +35,7 @@
             "**/Thumbs.db": true,
             "**/.vscode/.history/": true,
             "lvgl_ui_generator": true,
+            "lvgl_ui_generator_v2": true,
             "yolov3_baseline_project": true,
             "ui_randomizer": true,
             "paper": true
@@ -43,7 +48,12 @@
         "remote.localPortHost": "allInterfaces",
         "zotero.serverUrl": "http://172.20.128.1:23119",
         // "latex-utilities.zotero.zoteroUrl": "http://172.20.128.1:23119",
-        "zotero-citation-picker.port": "http://172.20.128.1:23119/better-bibtex/cayw?format=pandoc"
+        "zotero-citation-picker.port": "http://172.20.128.1:23119/better-bibtex/cayw?format=pandoc",
+        "files.associations": {
+            "*.robot": "robotframework",
+            "random_design_ui.h": "c"
+        },
+        "python.languageServer": "Pylance"
     },
     "launch": {
         "version": "0.2.0",

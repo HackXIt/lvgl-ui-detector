@@ -1,12 +1,15 @@
 [submodule "ui_randomizer"]
 	path = ui_randomizer
-	url = git@github.com:HackXIt/ui_randomizer.git
+	url = ../ui_randomizer.git
 [submodule "lvgl_ui_generator"]
 	path = lvgl_ui_generator
-	url = git@github.com:HackXIt/lvgl_ui_generator.git
+	url = ../lvgl_ui_generator.git
 [submodule "notebook/baseline"]
 	path = yolov3_baseline_project
-	url = git@github.com:HackXIt/Object-Detection-for-Graphical-User-Interface.git
+	url = ../Object-Detection-for-Graphical-User-Interface.git
 [submodule "paper"]
 	path = paper
 	url = ../ui-detector-paper
+[submodule "lvgl_ui_generator_v2"]
+	path = lvgl_ui_generator_v2
+	url = ../lvgl_ui_generator_v2.git
