@@ -5,10 +5,6 @@
             "path": ".."
         },
         {
-            "name": "LVGL UI Generator",
-            "path": "../lvgl_ui_generator"
-        },
-        {
             "name": "LVGL UI Generator v2",
             "path": "../lvgl_ui_generator_v2"
         },
