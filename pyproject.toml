@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "lvgl-ui-detector"
+version = "0.1.0"
+description = "Just a project for developing inside .venv in jupyter-notebook"
+authors = ["HackXIt <hackxit@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "lvgl_ui_detector"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jupyterlab = "^4.1.5"
+opencv-python = "^4.9.0.80"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
