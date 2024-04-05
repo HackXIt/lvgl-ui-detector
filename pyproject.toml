@@ -11,6 +11,9 @@ packages = [{include = "lvgl_ui_detector"}]
 python = "^3.11"
 jupyterlab = "^4.1.5"
 opencv-python = "^4.9.0.80"
+matplotlib = "^3.8.3"
+pyyaml = "^6.0.1"
+ipykernel = "^6.29.4"
 
 
 [build-system]
