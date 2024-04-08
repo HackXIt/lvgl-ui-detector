@@ -3,6 +3,7 @@ tmp
 *.pth
 clearml.conf
 lvgl-ui-detector*.json
+dataset
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
