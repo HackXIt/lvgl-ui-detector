@@ -17,8 +17,14 @@ RUN pip install --no-cache-dir jupyter-ai-chatgpt jupyterlab-git jupyterlab-gith
 # -kl: Display the kernel logo (python logo in the upper right corner of the laptop screen)
 # -T: Display toolbar under menu tab (save, add/delete/move cell, stop/restart kernel, etc.)
 # -N: Display file name on laptop screen
-
 RUN jt -t onedork -f firacode -nf robotosans -fs 14 -nfs 14
+
+# Setup ClearML
+RUN pip install clearml[gs]
+# Copy the clearml configuration files & keys
+COPY clearml.conf /root/clearml.conf
+COPY lvgl-ui-detector-b96d78b9498f.json /root/lvgl-ui-detector-b96d78b9498f.json
+ENV GOOGLE_APPLICATION_CREDENTIALS /root/lvgl-ui-detector-b96d78b9498f.json
 
 ENV WORKSPACE_DIR /workspace
 ENV PROJECT_DIR ${WORKSPACE_DIR}/project

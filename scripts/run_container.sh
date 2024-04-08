@@ -8,7 +8,7 @@
 container_name=${1:-ultralytics-dev}
 port=${2:-8888}
 mount_dir=${3:-$(pwd)}
-image=${4:-hackxit/ui-detector:jupyter-dev-dark-extensions}
+image=${4:-hackxit/ui-detector:jupyter-dev}
 
 # Check if container with given name already exists
 if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
