@@ -26,6 +26,7 @@ COPY clearml.conf /root/clearml.conf
 COPY lvgl-ui-detector-b96d78b9498f.json /root/lvgl-ui-detector-b96d78b9498f.json
 ENV GOOGLE_APPLICATION_CREDENTIALS /root/lvgl-ui-detector-b96d78b9498f.json
 
+ENV HOMELAB 1
 ENV WORKSPACE_DIR /workspace
 ENV PROJECT_DIR ${WORKSPACE_DIR}/project
 ENV ULTRALYTICS_DIR /usr/src/ultralytics
