@@ -4,14 +4,18 @@
             "name": "UI Detector",
             "path": ".."
         },
+        // {
+        //     "name": "LVGL UI Generator",
+        //     "path": "../lvgl_ui_generator"
+        // },
         {
             "name": "LVGL UI Generator v2",
             "path": "../lvgl_ui_generator_v2"
         },
-        {
-            "name": "YOLOv3 Baseline Project",
-            "path": "../yolov3_baseline_project"
-        },
+        // {
+        //     "name": "YOLOv3 Baseline Project",
+        //     "path": "../yolov3_baseline_project"
+        // },
         {
             "name": "UI Randomizer",
             "path": "../ui_randomizer"
@@ -49,7 +53,13 @@
             "*.robot": "robotframework",
             "random_design_ui.h": "c"
         },
-        "python.languageServer": "Pylance"
+        "python.languageServer": "Pylance",
+        "todo-tree.filtering.excludeGlobs": [
+            "**/lv_micropython/*/**",
+            "**/lvgl/*/**",
+            "**/lv_drivers/*/**",
+            "**/yolov3_baseline_project/*/**",
+        ]
     },
     "launch": {
         "version": "0.2.0",
