@@ -1,6 +1,8 @@
 .vscode/.history
 tmp
 *.pth
+clearml.conf
+lvgl-ui-detector*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
