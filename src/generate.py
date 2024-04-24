@@ -1,243 +1,198 @@
-import subprocess
 import os
-import sys
-import shutil
-import time
-import logging as log
-import yaml
-import numpy as np
+from typing import List, Tuple
+from clearml import PipelineDecorator, Task
 
-from typing import List
-from typing import Tuple
-from clearml import Dataset, Task, Logger, PipelineDecorator
-from argparse import Namespace
-
-from util.cli import create_parser, validate_arguments, widget_types
-from util.dataset import create_dataset, create_datalist_file
-
-# Dictionary to provide original widget class name (appending "lv_" to the widget type) and the index of the widget type in the list
-# NOTE Some class names might actually be an abbreviated version of the widget type, but we ignore those special cases as in the future they all should follow the same pattern
-classes = {}
-for i, widget in enumerate(widget_types):
-    classes[i] = widget
-poetry_invoke = "poetry run invoke".split(' ')
-
-def run_ui_generator(micropython: str, main: str, generator, working_dir: str, *args, use_absolute_paths: bool = False, capture_output: bool = False, continue_on_error: bool = False):
-    # NOTE Assumes correct input arguments, to be validated before calling this function
-    # NOTE subprocess arguments only accepts strings, which is why we convert all arguments to strings for this action
-    if use_absolute_paths:
-        args = [os.path.abspath(micropython), os.path.abspath(main), "-m", generator] + [str(arg) for arg in args]
-    else:
-        args = [micropython, main, "-m", generator] + [str(arg) for arg in args]
-    log.info("Running command: %s", ' '.join(args))
-    gen = subprocess.run(args, cwd=os.path.abspath(working_dir), capture_output=capture_output, text=True)
+@PipelineDecorator.component(return_values=['gen_image', 'gen_text'], name="Capture random widgets")
+def capture_random_widgets(output_folder: str, widget_types: List[str], 
+                           i: int = 1,
+                           micropython: str = "", main: str = "",
+                           width: str = "480", height: str = "480", count: int = 3, layout: str = "none", normalize: bool = True):
+    import subprocess, os, shutil
+    task = Task.current_task()
+    if not os.path.exists(micropython) or not os.path.isfile(micropython):
+        if 'MICROPYTHON_BIN' in os.environ:
+            micropython = os.environ['MICROPYTHON_BIN']
+            # task.get_logger().report_text(f"Using micropython binary from environment variable 'MICROPYTHON_BIN': '{micropython}'.")
+        else:
+            task.get_logger().report_text(f"Path to micropython binary '{micropython}' is not valid (does not exist or is not a file).")
+            task.mark_failed()
+    if not os.path.exists(main) or not os.path.isfile(main):
+        if 'MICROPYTHON_MAIN' in os.environ:
+            main = os.environ['MICROPYTHON_MAIN']
+            # task.get_logger().report_text(f"Using main script from environment variable 'MICROPYTHON_MAIN': '{main}'.")
+        else:
+            task.get_logger().report_text(f"Path to main script '{main}' is not valid (does not exist or is not a file).")
+            task.mark_failed()
+    if not os.path.exists(output_folder) or not os.path.isdir(output_folder):
+        task.get_logger().report_text(f"Output folder '{output_folder}' is not valid (does not exist or is not a directory).")
+        task.mark_failed()
+    # Generate random widget capture
+    command = [os.path.abspath(micropython), os.path.abspath(main), "-m", "random", "-o", 'screenshot.jpg', "-W", width, "-H", height, "-c", str(count), "-l", layout, "-t", *widget_types, "--normalize" if normalize else ""]
+    gen = subprocess.run(args=command, cwd=os.path.abspath(os.path.curdir), capture_output=True, text=True)
     if gen.returncode != 0:
-        log.error("UI generation failed with return code %s.", gen.returncode)
-        log.debug("STDOUT:\n%s", gen.stdout)
-        log.debug("STDERR:\n%s", gen.stderr)
-        if not continue_on_error:
-            sys.exit(1)
-    else:
-        log.info("UI generation successful with return code %s.", gen.returncode)
-        if capture_output:
-            log.debug("STDOUT:\n%s", gen.stdout)
+        task.get_logger().report_text(f"Failed to generate random widgets in iteration {i}:\n{gen.stdout}\n{gen.stderr}")
+        task.mark_failed()
+    tmp_image = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir), "screenshot.jpg"))
+    tmp_text = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir), "screenshot.txt"))
+    gen_image = os.path.abspath(os.path.join(output_folder, f"ui_{i}.jpg"))
+    gen_text = os.path.abspath(os.path.join(output_folder, f"ui_{i}.txt"))
+    try:
+        shutil.move(tmp_image, gen_image)
+        shutil.move(tmp_text, gen_text)
+    except FileNotFoundError as e:
+        task.get_logger().report_text(f"Failed to move files in iteration {i}:\n{tmp_image} -> {gen_image}\n{tmp_text} -> {gen_text}\n{e}")
+        task.mark_failed()
+    return gen_image, gen_text
 
-def prepare_output_folder(output_folder: str, clean: bool = False):
-    if clean:
-        shutil.rmtree(output_folder, ignore_errors=True)
-    os.makedirs(output_folder, exist_ok=True)
-    return os.path.abspath(output_folder)
-
-@PipelineDecorator.component(name="capture designs",
-                             task_type=Task.TaskTypes.data_processing,
-                             continue_on_fail=False,
-                             return_values=['data'])
-def capture_with_designs(**kwargs) -> List[Tuple[str, str]]:
-    import os, shutil, time, subprocess
-    data = {'files': [], 'errors': []}
-    # kwargs["output_folder"] = prepare_output_folder(kwargs["output_folder"], kwargs["clean"])
-    if kwargs["clean"]:
-        shutil.rmtree(kwargs["output_folder"], ignore_errors=True)
-    os.makedirs(kwargs["output_folder"], exist_ok=True)
-    kwargs["output_folder"] = os.path.abspath(kwargs["output_folder"])
-    args = [os.path.abspath(kwargs["micropython"]), os.path.abspath(kwargs["main"]), "-m", kwargs["generator"], "-f", design_file, "-o", f"{design_base}.jpg", "--normalize" if kwargs["normalize"] else ""]
-    for design in os.listdir(kwargs["design_folder"]):
-        design_file = os.path.abspath(os.path.join(kwargs["design_folder"], design))
-        design_base = os.path.splitext(design)[0]
-        gen = subprocess.run(args, cwd=os.path.abspath(kwargs["working_dir"]), capture_output=kwargs['capture_output'], text=True)
-        if gen.returncode != 0:
-            log.error("UI generation failed with return code %s.", gen.returncode)
-            log.debug("STDOUT:\n%s", gen.stdout)
-            log.debug("STDERR:\n%s", gen.stderr)
+@PipelineDecorator.component(return_values=['gen_image', 'gen_text'], name="Capture design")
+def capture_design(output_folder: str, design_file: str,
+                   micropython: str = "", main: str = "", normalize: bool = True):
+    import subprocess, os, shutil
+    task = Task.current_task()
+    design_file = str(design_file) # Need to evaluate LazyEvalWrapper objects
+    if not os.path.exists(micropython) or not os.path.isfile(micropython):
+        if 'MICROPYTHON_BIN' in os.environ:
+            micropython = os.environ['MICROPYTHON_BIN']
         else:
-            log.info("UI generation successful with return code %s.", gen.returncode)
-            if kwargs['capture_output']:
-                log.debug("STDOUT:\n%s", gen.stdout)
-        tmp_image = os.path.abspath(os.path.join(kwargs["working_dir"], f"{design_base}.jpg"))
-        tmp_text = os.path.abspath(os.path.join(kwargs["working_dir"], f"{design_base}.txt"))
-        gen_image = os.path.abspath(os.path.join(kwargs["output_folder"], f"{design_base}.jpg"))
-        gen_text = os.path.abspath(os.path.join(kwargs["output_folder"], f"{design_base}.txt"))
-        try:
-            shutil.move(tmp_image, gen_image)
-            shutil.move(tmp_text, gen_text)
-        except FileNotFoundError as e:
-            log.error("Failed to move files for widget %s in iteration %s:\n%s -> %s\n%s -> %s", 
-                      widget, i, tmp_image, gen_image, tmp_text, gen_text)
-            data['errors'].append((design, e.strerror))
-            continue
-        data.append((gen_image, gen_text))
-        if kwargs["delay"] > 0:
-            time.sleep(kwargs["delay"] / 1000)
-    return data
-
-@PipelineDecorator.component(name="capture random",
-                             task_type=Task.TaskTypes.data_processing,
-                             continue_on_fail=False,
-                             return_values=['data'])
-def capture_with_random(**kwargs) -> List[Tuple[str, str]]:
-    import os, shutil, time, subprocess
-    data = {'files': [], 'errors': [], 'types': {}}
-    if kwargs["clean"]:
-        shutil.rmtree(kwargs["output_folder"], ignore_errors=True)
-    os.makedirs(kwargs["output_folder"], exist_ok=True)
-    kwargs["output_folder"] = os.path.abspath(kwargs["output_folder"])
-    args = [os.path.abspath(kwargs["micropython"]), os.path.abspath(kwargs["main"]), "-m", kwargs["generator"], 
-            "-W", kwargs["width"], "-H", kwargs["height"], "-c", kwargs["count"], "-l", kwargs["layout"], 
-            "-o", "screenshot.jpg", "-t", *kwargs["widget_types"], "--normalize" if kwargs["normalize"] else ""]
-    for i in range(kwargs["iterations"]):
-        gen = subprocess.run(args, cwd=os.path.abspath(kwargs["working_dir"]), capture_output=kwargs['capture_output'], text=True)
-        if gen.returncode != 0:
-            log.error("UI generation failed with return code %s.", gen.returncode)
-            log.debug("STDOUT:\n%s", gen.stdout)
-            log.debug("STDERR:\n%s", gen.stderr)
+            task.get_logger().report_text(f"Path to micropython binary '{micropython}' is not valid (does not exist or is not a file).")
+            task.mark_failed()
+    if not os.path.exists(main) or not os.path.isfile(main):
+        if 'MICROPYTHON_MAIN' in os.environ:
+            main = os.environ['MICROPYTHON_MAIN']
         else:
-            log.info("UI generation successful with return code %s.", gen.returncode)
-            if kwargs['capture_output']:
-                log.debug("STDOUT:\n%s", gen.stdout)
-        tmp_image = os.path.abspath(os.path.join(kwargs["working_dir"], "screenshot.jpg"))
-        tmp_text = os.path.abspath(os.path.join(kwargs["working_dir"], "screenshot.txt"))
-        gen_image = os.path.abspath(os.path.join(kwargs["output_folder"], f"ui_{i}.jpg"))
-        gen_text = os.path.abspath(os.path.join(kwargs["output_folder"], f"ui_{i}.txt"))
-        try:
-            shutil.move(tmp_image, gen_image)
-            shutil.move(tmp_text, gen_text)
-        except FileNotFoundError as e:
-            log.error("Failed to move files in iteration {}:\n{} -> {}\n{} -> {}",
-                        i, tmp_image, gen_image, tmp_text, gen_text)
-            data['errors'].append((str(i), e.strerror))
-            continue
-        data["files"].append((gen_image, gen_text))
-        for type in kwargs["widget_types"]:
-            data["types"][type] = data["types"].get(type, 0) + 1
-        if kwargs["delay"] > 0:
-            time.sleep(kwargs["delay"] / 1000)
-    return data
+            task.get_logger().report_text(f"Path to main script '{main}' is not valid (does not exist or is not a file).")
+            task.mark_failed()
+    if not os.path.exists(output_folder) or not os.path.isdir(output_folder):
+        task = Task.current_task()
+        task.get_logger().report_text(f"Output folder '{output_folder}' is not valid (does not exist or is not a directory).")
+        task.mark_failed()
+    if not os.path.exists(design_file) or not os.path.isfile(design_file):
+        task = Task.current_task()
+        task.get_logger().report_text(f"Design file '{design_file}' is not valid (does not exist or is not a file).")
+        task.mark_failed()
+    # Generate design capture
+    command = [micropython, main, "-m", "design", "-o", 'screenshot.jpg', "-f", design_file, "--normalize" if normalize else ""]
+    gen = subprocess.run(args=command, cwd=os.path.abspath(os.path.curdir), capture_output=True, text=True)
+    if gen.returncode != 0:
+        task.get_logger().report_text(f"Failed to generate design {design_file}:\n{gen.stdout}\n{gen.stderr}")
+        task.mark_failed()
+    tmp_image = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir), "screenshot.jpg"))
+    tmp_text = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir), "screenshot.txt"))
+    gen_image = os.path.abspath(os.path.join(output_folder, f"design_{os.path.basename(os.path.abspath(design_file))}.jpg"))
+    gen_text = os.path.abspath(os.path.join(output_folder, f"design_{os.path.basename(os.path.abspath(design_file))}.txt"))
+    try:
+        shutil.move(tmp_image, gen_image)
+        shutil.move(tmp_text, gen_text)
+    except FileNotFoundError as e:
+        task.get_logger().report_text(f"Failed to move files:\n{tmp_image} -> {gen_image}\n{tmp_text} -> {gen_text}")
+    return gen_image, gen_text
 
-@PipelineDecorator.component(name="upload dataset",
-                             task_type=Task.TaskTypes.data_processing,
-                             continue_on_fail=False,
-                             return_values=['dataset_id'])
-def upload_dataset(data: dict, output_folder: str, dataset_name: str, generator: str, used_classes: dict, dataset_dict: dict, 
-                prefix: str = "UI Randomizer", project: str = "LVGL UI Detector", tags: List[str] = ["lvgl-ui-detector"]):
-    import os
-    from clearml import Dataset
-    dataset = Dataset.get(dataset_name=f"{prefix} - {dataset_name}",
-                              dataset_project=project,
-                              dataset_tags=tags + [generator],
-                              auto_create=True, alias=dataset_name, overridable=True)
-    if dataset.is_final():
-        dataset = Dataset.create(dataset_name=f"{prefix} - {dataset_name}",
-                                    dataset_project=project,
-                                    dataset_tags=tags + [generator],
-                                    parent_datasets=[dataset.id])
-    counts = []
-    root = os.path.abspath(output_folder)
-    folders = sorted(os.listdir(root))
+@PipelineDecorator.component(return_values=['dataset'], name="Create dataset")
+def create_dataset(output_folder: str, dataset_name: str, proxy_files: List[str], **kwargs):
+    import os, yaml, random, shutil
+    task = Task.current_task()
+    files = [(str(image), str(annotation)) for image, annotation in proxy_files] # Need to evaluate LazyEvalWrapper objects
+    widget_types = ["arc", "bar", "button", "buttonmatrix", "calendar", "chart", "checkbox", "dropdown", "image", "imagebutton", "keyboard", "label", "led", "line", "list", "menu", "messagebox", "roller", "scale", "slider", "spangroup", "spinbox", "spinner", "switch", "table", "tabview", "textarea", "tileview", "window"]
+    dataset_file = os.path.abspath(os.path.join(output_folder, f"{dataset_name}.yaml"))
+    train_img_dir = "images/train"
+    train_label_dir = "labels/train"
+    val_img_dir = "images/val"
+    val_label_dir = "labels/val"
+    test_img_dir = "images/test"
+    test_label_dir = "labels/test"
+    target_dir = os.path.join(output_folder, dataset_name)
+    train_img_folder = os.path.join(target_dir, train_img_dir)
+    train_label_folder = os.path.join(target_dir, train_label_dir)
+    val_img_folder = os.path.join(target_dir, val_img_dir)
+    val_label_folder = os.path.join(target_dir, val_label_dir)
+    test_img_folder = os.path.join(target_dir, test_img_dir)
+    test_label_folder = os.path.join(target_dir, test_label_dir)
+    # Create all necessary folders
+    folders = [target_dir, train_img_folder, train_label_folder, val_img_folder, val_label_folder, test_img_folder, test_label_folder]
     for folder in folders:
-        counts.append([len(os.listdir(root / folder))])
-    dataset.add_files(path=os.path.abspath(os.path.join(output_folder, dataset_name)))
-    dataset.add_files(path=os.path.abspath(os.path.join(output_folder, dataset_name + ".yaml")))
-    metadata = {
-        "generator": generator,
-        "command": ' '.join(sys.argv),
-        "dataset_file": dataset_name + ".yaml",
-        "errors": len(data['errors']),
-        "used_classes": used_classes,
-        "counts": counts,
-    }
-    dataset.set_metadata(metadata, metadata_name="generator_meta")
-    log = dataset.get_logger()
-    log.report_text(f"Generator: {generator}")
-    log.report_text(f"Command: {' '.join(sys.argv)}")
-    log.report_text(f"Dataset:\n{yaml.dump(dataset_dict)}")
-    log.report_text(f"Generator had {len(data['errors'])} errors.")
-    for i, error in enumerate(data['errors']):
-        log.report_text(f"Error #{i}: {error}", log.ERROR)
-    if generator == "random":
-        values = np.array([int(value) for value in data['types'].values()])
-        log.report_histogram("Widget Type Count", 
-                                "Counts", 
-                                values=values, 
-                                xlabels=[key for key in data['types'].keys()], 
-                                xaxis="Widget Types", 
-                                yaxis="Count")
-    log.report_histogram(title="Dataset statistics", series='Train Test Val split', labels=folders, values=counts)
-    dataset.finalize(auto_upload=True)
-    return dataset.id
+        os.makedirs(folder, exist_ok=kwargs.get("clean", True))
+    for i,(image, annotation) in enumerate(files):
+        # task.get_logger().report_text(f"[{i}]: {image} ({type(image)}) - {annotation} ({type(annotation)})")
+        # test = str(annotation)
+        # task.get_logger().report_text(f"Annotation file: {test} ({type(test)})")
+        for a_class in widget_types:
+            replacement = str(widget_types.index(a_class))
+            with open(annotation, 'r+') as f:
+                lines = f.readlines()
+                for i, line in enumerate(lines):
+                    line = line.replace(a_class + " ", replacement + " ")
+                    lines[i] = line
+                f.seek(0)
+                f.writelines(lines)
+                f.truncate()
+    def shuffle_split(input: List[str], split_ratio: tuple = (0.7, 0.1, 0.2)):
+        if len(split_ratio) != 3 or sum(split_ratio) != 1:
+            raise ValueError("Split ratio must be a tuple of 3 values that sum up to 1. (e.g. (0.7, 0.1, 0.2))")
+        random.shuffle(input)
+        part1 = int(len(input) * split_ratio[0])
+        part2 = int(len(input) * split_ratio[1])
+        # NOTE Part3 is the remainder of the input
 
-#args={"args": ['args'], "ClearML": ['project_name', 'task_name', 'task_tags']}
-@PipelineDecorator.pipeline(name="UI Randomizer", project="LVGL UI Detector", version="0.1.0",
-                            args_map={"args": ['args']})
-def clearml_main(args: Namespace):
-    from util.dataset import create_dataset, create_datalist_file
-    used_classes = {}
-    if args.generator == "random":
-        data = capture_with_random(**vars(args))
-        used_classes = {k: v for k, v in classes.items() if v in args.widget_types}
-    elif args.generator == "design":
-        data = capture_with_designs(**vars(args))
-        used_classes = classes
-
-    dataset_kwargs = {}
-    if args.split_ratio is not None:
-        dataset_kwargs["split_ratio"] = args.split_ratio
-    if args.clean:
-        dataset_kwargs["clean"] = args.clean
-    dataset_kwargs["fixes"] = {}
-    if args.normalize_bbox and args.generator == "random":
-        dataset_kwargs["fixes"]["normalize_bbox"] = {"width": args.width, "height": args.height}
-    if args.replace_class_names:
-        dataset_kwargs["fixes"]["class_replace"] = {"class_names": widget_types}
-    dataset_dict = create_dataset(args.output_folder, args.dataset, data['files'], classes, **dataset_kwargs)
-    # Add comment to dataset file with the command used to generate the data
-    dataset_file = os.path.join(args.output_folder, args.dataset + ".yaml")
-    with open(dataset_file, "a") as f:
-        f.write(f"# Command: {' '.join(sys.argv)}")
-    if args.datalist is not None:
-        datalist_file = os.path.join(args.output_folder, args.datalist)
-        create_datalist_file(data, datalist_file)
-    if args.clearml_upload:
-        upload_args = {"data": data, 
-                    "output_folder": args.output_folder, 
-                    "dataset_name": args.dataset, 
-                    "generator": args.generator, 
-                    "used_classes": used_classes, 
-                    "dataset_dict": dataset_dict}
-        print(f"Created dataset ID: f{upload_dataset(**upload_args)}")
-
-if __name__ == "__main__":
-    PipelineDecorator.run_locally()
-    parser = create_parser()
-    args = parser.parse_args()
-    # Configure logger
-    if args.verbose:
-        level = log.DEBUG
+        split1 = input[:part1]
+        split2 = input[part1:part1 + part2]
+        split3 = input[part1 + part2:]
+        return (split1, split2, split3)
+    # Shuffle images
+    if kwargs.get("split_ratio", None) is not None:
+        train, val, test = shuffle_split(files, kwargs["split_ratio"])
     else:
-        level = log.INFO
-    log.basicConfig(level=level, format="%(asctime)s|%(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
-    log.debug(args)
-    validate_arguments(args)
-    log.debug(args)
-    # Run main function
-    clearml_main(args)
-    print("UI Randomizer completed.")
+        train, val, test = shuffle_split(files)
+    # Copy images and labels to their respective folders
+    for _, (image_path, label_path) in enumerate(train):
+        shutil.move(image_path, os.path.join(train_img_folder, os.path.basename(image_path)))
+        shutil.move(label_path, os.path.join(train_label_folder, os.path.basename(label_path)))
+    for _, (image_path, label_path) in enumerate(val):
+        shutil.move(image_path, os.path.join(val_img_folder, os.path.basename(image_path)))
+        shutil.move(label_path, os.path.join(val_label_folder, os.path.basename(label_path)))
+    for _, (image_path, label_path) in enumerate(test):
+        shutil.move(image_path, os.path.join(test_img_folder, os.path.basename(image_path)))
+        shutil.move(label_path, os.path.join(test_label_folder, os.path.basename(label_path)))
+    def dump_yaml_dataset(output_folder: str, name: str, classes: dict, train_dir: str, val_dir: str, test_dir: str = None) -> str:
+        dataset_yaml = {
+            'path': os.path.join(os.path.curdir, name),
+            'train': train_dir,
+            'val': val_dir,
+            'test': test_dir,
+            'names': classes
+        }
+        yaml_file = os.path.join(output_folder, f"{name}.yaml")
+        with open(yaml_file, 'w') as file:
+            yaml.dump(dataset_yaml, file)
+        return yaml_file
+    yaml_file = dump_yaml_dataset(output_folder, dataset_name, kwargs.get("classes", widget_types), train_img_dir, val_img_dir, test_img_dir)
+    return yaml_file
+
+@PipelineDecorator.pipeline(name="UI Randomizer", project="LVGL UI Detector", pipeline_execution_queue="default", default_queue="default")
+def ui_randomizer_pipeline(mode: str, **kwargs):
+    from clearml import Dataset
+    files = []
+    if mode == "random" and "iterations" in kwargs:
+        for i in range(kwargs.get("iterations", 1)):
+            capture, annotation = capture_random_widgets(output_folder=kwargs.get("output_folder", "./tmp"),
+                                                         i=i,
+                                                         widget_types=kwargs.get("widget_types", ["button", "label", "switch"]))
+            files.append((capture, annotation))
+    elif mode == "design" and "designs" in kwargs:
+        for file in kwargs["designs"]:
+            capture, annotation = capture_design(**kwargs)
+            files.append((capture, annotation))
+    dataset_file = create_dataset(proxy_files=files, **kwargs)
+    dataset = Dataset.create(kwargs["dataset_name"], kwargs.get("project_name", "LVGL UI Detector"), kwargs.get("dataset_tags", "randomizer"), use_current_task=True)
+    dataset.add_files(kwargs.get("output_folder"))
+
+if __name__ == '__main__':
+    # PipelineDecorator.debug_pipeline()
+    # PipelineDecorator.run_locally()
+    ui_randomizer_pipeline(mode="random", 
+                           output_folder="./tmp", 
+                           widget_types=["button", "label", "switch"], 
+                           iterations=2, 
+                           dataset_name="random_dataset",
+                           micropython=os.environ.get("MICROPYTHON_BIN", ""),
+                           main=os.environ.get("MICROPYTHON_MAIN", ""))
+    print("Pipeline executed successfully")
