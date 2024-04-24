@@ -59,7 +59,7 @@
             "**/lvgl/*/**",
             "**/lv_drivers/*/**",
             "**/yolov3_baseline_project/*/**",
-        ]
+        ],
     },
     "launch": {
         "version": "0.2.0",
