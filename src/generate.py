@@ -167,7 +167,32 @@ def create_dataset(output_folder: str, dataset_name: str, proxy_files: List[str]
     yaml_file = dump_yaml_dataset(output_folder, dataset_name, kwargs.get("classes", widget_types), train_img_dir, val_img_dir, test_img_dir)
     return yaml_file
 
-@PipelineDecorator.pipeline(name="UI Randomizer", project="LVGL UI Detector", pipeline_execution_queue="default", default_queue="default")
+@PipelineDecorator.component(return_values=['dataset_id'], name="Run randomizer")
+def run_randomizer(mode: str, **kwargs):
+    from clearml import Task, Dataset
+    task = Task.current_task()
+    files = []
+    if mode == "random" and "iterations" in kwargs:
+        for i in range(kwargs.get("iterations", 1)):
+            capture, annotation = capture_random_widgets(output_folder=kwargs.get("output_folder", "./tmp"),
+                                                         i=i,
+                                                         widget_types=kwargs.get("widget_types", ["button", "label", "switch"]))
+            files.append((capture, annotation))
+    elif mode == "design" and "designs" in kwargs:
+        for file in kwargs["designs"]:
+            capture, annotation = capture_design(**kwargs)
+            files.append((capture, annotation))
+    else:
+        task.get_logger().report_text(f"Invalid mode '{mode}'.")
+        task.mark_failed()
+    dataset_file = create_dataset(proxy_files=files, **kwargs)
+    dataset = Dataset.create(kwargs["dataset_name"], kwargs.get("project_name", "LVGL UI Detector"), kwargs.get("dataset_tags", "randomizer"), use_current_task=True)
+    dataset.add_files(kwargs.get("output_folder"))
+    dataset.add_files(dataset_file)
+    return dataset.id
+
+@PipelineDecorator.pipeline(name="UI Randomizer", project="LVGL UI Detector",
+                            pipeline_execution_queue="default", default_queue="default")
 def ui_randomizer_pipeline(mode: str, **kwargs):
     from clearml import Dataset
     files = []
@@ -186,11 +211,19 @@ def ui_randomizer_pipeline(mode: str, **kwargs):
     dataset.add_files(kwargs.get("output_folder"))
 
 if __name__ == '__main__':
+    implemented_types = ["arc", 
+                     "bar", "button", "buttonmatrix", 
+                     "calendar", "checkbox", 
+                     "dropdown", 
+                     "label", "led", 
+                     "roller", 
+                     "scale", "slider", "spinbox", "switch", 
+                     "table", "textarea"]
     # PipelineDecorator.debug_pipeline()
     # PipelineDecorator.run_locally()
     ui_randomizer_pipeline(mode="random", 
                            output_folder="./tmp", 
-                           widget_types=["button", "label", "switch"], 
+                           widget_types=implemented_types, 
                            iterations=2, 
                            dataset_name="random_dataset",
                            micropython=os.environ.get("MICROPYTHON_BIN", ""),
