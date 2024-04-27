@@ -1,8 +1,12 @@
 {
     "folders": [
         {
-            "name": "UI Detector",
+            "name": "ROOT",
             "path": ".."
+        },
+        {
+            "name": "UI Detector",
+            "path": "../ui-detector"
         },
         // {
         //     "name": "LVGL UI Generator",
@@ -34,6 +38,7 @@
             "**/.DS_Store": true,
             "**/Thumbs.db": true,
             "**/.vscode/.history/": true,
+            "ui-detector": true,
             "lvgl_ui_generator": true,
             "lvgl_ui_generator_v2": true,
             "yolov3_baseline_project": true,

@@ -13,3 +13,6 @@
 [submodule "lvgl_ui_generator_v2"]
 	path = lvgl_ui_generator_v2
 	url = ../lvgl_ui_generator_v2.git
+[submodule "ui-detector"]
+	path = ui-detector
+	url = git@github.com:HackXIt/ui-detector.git
