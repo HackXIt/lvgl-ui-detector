@@ -65,6 +65,7 @@
             "**/lv_drivers/*/**",
             "**/yolov3_baseline_project/*/**",
         ],
+        "json.format.enable": false
     },
     "launch": {
         "version": "0.2.0",
