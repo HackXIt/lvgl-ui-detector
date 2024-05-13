@@ -156,8 +156,7 @@ The script and image currently only serve my development purposes and are not ta
 
 # Feature roadmap
 
-- [ ] Add more widgets to the generator and model
-- [ ] Improve dataset size (min. 50 per class) and training process (1-click-pipeline)
-- [ ] Add widget customization in generator (color, size, etc.)
-- [ ] Add design file system for randomizer & generator
-- [ ] Add UI presets in generator (e.g. login screen, settings screen, etc.)
+- [x] Add more widgets to the generator and model
+- [x] Improve dataset size (min. 50 per class) and training process (1-click-pipeline)
+- [x] Add widget customization in generator (color, size, etc.)
+- [x] Add design file system for randomizer & generator
