@@ -1,139 +1,106 @@
 # LVGL UI Detector
 
-This machine learning project is a user interface widget detector for the [LVGL](https://lvgl.io/) framework. The base is the [YOLOv8 model](https://github.com/ultralytics/ultralytics), trained on the synthesized dataset from the programs/scripts in this repository.
+This machine learning project is a user interface widget detector for the [Light and Versatile Graphics Library (LVGL)](https://lvgl.io/). The base is the [YOLOv8 model](https://github.com/ultralytics/ultralytics), trained on synthesized datasets created from the programs/scripts in this repository and corresponding submodules.
 
 The purpose of the model is to detect and locate widgets from a provided screenshot to aid in automated testing procedures requiring this information.
 
-It was fine-tuned specifically for the LVGL framework, and is able to detect the following widgets:
+It was trained specifically for the LVGL framework, with the following widgets implemented in the dataset generator:
 
+- Arc
+- Bar
 - Button
-- Switch
-- Slider
+- Buttonmatrix
+- Calendar
 - Checkbox
+- Dropdown
 - Label
+- Roller
+- Scale
+- Slider
+- Spinbox
+- Switch
+- Table
+- Textarea
 - ...(more to come in the future)
 
-The model is able to detect these widgets in a variety of different contexts, including:
+This repository serves as the main entry point for the project and contains the main documentation as well as the project structure.
+It also features a docker image for development purposes to work inside Jupyter notebook.
+It additionally contains a few scripts for the container and also for inspecting or uploading datasets manually. 
 
-- (work in progress)
+The image and scripts are **for my personal use** and will be deprecated in the future.
 
-# Author's Note
+## Project structure
 
-This project was created for my bachelor thesis at the [University of Applied Sciences Technikum Vienna](https://www.technikum-wien.at/en/).
+The project is divided into several submodules, each serving a specific purpose:
 
-All currently relevant information can be found in the [Exposé](./doc/Exposé_Precision_at_Pixel_Level___YOLOv8_vs__conventional_embedded_UI_testing.pdf) and later on in the [thesis](./doc/Thesis.pdf) itself.
+- [UI Generator (Version 1)](./lvgl_ui_generator): A modified version of the LVGL simulator for PC that generates a single random UI and captures a screenshot with annotations, using C and LVGL. This generator was originally used for UI screenshot generation, but was **deprecated** in favor of **version 2**, which uses micropython as a base.
+- [UI Generator (Version 2)](./lvgl_ui_generator_v2): An updated version of the UI generator that uses micropython and corresponding LVGL bindings as a base. This version is more flexible, easier to use and more maintenable than the original version.
+- [UI Randomizer](./ui_randomizer): A python script module which uses the UI generator to create multiple UI screenshots with annotations in a single CLI interface. The output is organized into a dataset in YOLO format for training the model. **This module is generally deprecated** in favor of the UI Detector submodule, which combines the functionality of the UI Randomizer with YOLO training and optimization pipelines into a single repository.
+- [UI Detector](./ui-detector): A repository containing multiple scripts/pipelines for generating datasets, training the YOLOv8 Model and hyperparameter optimization. **This repository is the main focus of the project.** It relies heavily on the usage of [ClearML](https://clear.ml/) for experiment tracking, model optimization and dataset versioning.
+- [Paper](./paper): The repository containing the [exposé](./paper/Expose.tex) and [final paper](./paper/Thesis.tex) for my bachelor thesis, describing the theoretical background, the project structure and the results of the project. Results include the evaluation of the base model and the project as a whole. Since this project and its submodules are subject to change in the future, [a list of commits is provided in the paper repository](./paper/commits.md), which showcase the state of the project at the time of finishing the paper. The final source state of the project from the perspective of the paper can also be found in the [release marked `paper-final`](https://github.com/HackXIt/lvgl-ui-detector/releases) of this repository.
 
-The project is still a work in progress. The model is not yet properly trained and the UI generator is not yet fully functional.
+## Dependency management
 
-----
+All projects use [Poetry](https://python-poetry.org/) for python package creation and dependency management. This repository as well as each submodule contains a `pyproject.toml` file with the necessary dependencies to work with the project. **Please refer to the README of each submodule for more information on how to set up the environment.**
 
-## The LVGL UI generator
+The main project has a `pyproject.toml` due to historic reasons, since it used to contain the code of the UI Detector submodule. It now serves more as a placeholder and starting point if new submodules would be added. In general, **the main project's ``pyproject.toml` should not be used for setting up an environment**, but rather serve as a documentation and starting point for the project. In the future _(after the paper is released)_, contents of the main project will get more cleaned up.
 
-The UI generator is a modification of the LVGL simulator for PC to generate synthetic UIs. 
-It is based on the [lv_port_pc_vscode](https://github.com/lvgl/lv_port_pc_vscode) since that is the IDE I use and also the only one I dared to modify.
+## ClearML
+
+The project uses [ClearML](https://clear.ml/) for experiment tracking, model optimization and dataset versioning. ClearML is a powerful tool that allows for easy tracking of experiments, datasets and models. It also provides a powerful hyperparameter optimization tool that can be used to optimize the model for the best possible performance.
+
+Since the [UI Detector submodule](./ui-detector/) relies so heavily on ClearML, it is required to have an account and API key setup to use it. This is also the reason why the [UI Randomizer submodule](./ui_randomizer/) exists, since it can be used to run the generator repeatedly without the hard dependency on ClearML. For training purposes, the [YOLOv8 python package](https://docs.ultralytics.com/usage/python/) as well as [CLI tools](https://docs.ultralytics.com/usage/cli/) can be used to train a model on generated datasets without requiring ClearML.
+
+ClearML also provides the possibility of setting up a standalone server, which can be used to host locally. If you do not want to setup an account with ClearML directly, you are required to setup a local server to use the UI Detector submodule. You can find out more information on how to set up a local server in the [ClearML server documentation](https://clear.ml/docs/latest/docs/deploying_clearml/clearml_server).
+
+### ClearML configuration
+
+For simply using ClearML, the API keys can be provided directly in the CLI, in code or as environment variables. To connect to the ClearML SDK it is as simple as running `clearml-init` in your terminal and following the instructions. Checkout the [Getting Started Tutorial](https://clear.ml/docs/latest/docs/getting_started/ds/ds_first_steps) for more details.
+
+However, to effectively orchestrate tasks/pipelines you need to use the ClearML agent, which requires a configuration file.
+An example ClearML configuration can be found in the [ClearML agent repository](https://github.com/allegroai/clearml-agent), which contains a basic [`clearml.conf`](https://raw.githubusercontent.com/allegroai/clearml-agent/master/docs/clearml.conf) file. This file can be modified and stored in the target machine, mainly to configure the [ClearML agent](https://clear.ml/docs/latest/docs/clearml_agent/).
+
+More information about the configuration file can be found in the [ClearML config documentation](https://clear.ml/docs/latest/docs/configs/configuring_clearml).
+
+Configuration options that need to be modified on the template are:
+- `api.api_server`: The URL of the ClearML server you are using. If you are using the ClearML cloud service, this should be `https://api.clear.ml`, otherwise it should point to the URL of your local server.
+- `api.web_server`: The URL of the ClearML web server you are using. If you are using the ClearML cloud service, this should be `https://app.clear.ml`, otherwise it should point to the URL of your local server.
+- `api.files_server`: The URL of the ClearML files server you are using. If you are using the ClearML cloud service, this should be `https://files.clear.ml`, otherwise it should point to the URL of your local server.
+- `api.credentials`: An object containing the `access_key` and `secret_key` for your account on the used ClearML server. They can be found/created in your ClearML account settings on the web interface. You may also configure these by setting the `CLEARML_API_ACCESS_KEY` and `CLEARML_API_SECRET_KEY` environment variables. More information on setting up these keys can be found in the [ClearML WebApp documentation](https://clear.ml/docs/latest/docs/webapp/webapp_profile/#clearml-credentials).
+
+Beyond that, it is recommend to checkout the `agent` section of the configuration file to configure the agent according to your needs. The agent is used to run experiments on remote machines and can also be used to run the UI Detector submodule on a remote machine. 
+
+_(For the generator it requires a setup display server, such as the [X window system](https://www.x.org/wiki/Documentation/))_
+
+## LVGL UI Generator (Version 1)
+
+Version 1 of the LVGL UI Generator is a modified version of the LVGL simulator for PC that generates a single random UI and captures a screenshot with annotations. It is based on the [lv_port_pc_vscode](https://github.com/lvgl/lv_port_pc_vscode) repository, since that is the IDE I use and also the only one I dared to modify.
 
 When launched with the proper arguments, it will open a window with a single container widget of the provided size placed inside. After rendering the UI, it will generate a screenshot of the container and save it to the provided path. It will also generate a text file with the bounding boxes of the placed widgets.
 
-Keep in mind, that the provided path must be prefixed with `/` as that is the local file system indicator for LVGL, otherwise it doesn't know where to save the file (i.e. which file driver to use). Also the generated label file uses the widget name instead of a class id and the bounding box is in pixel values. This is by design, as it is far easier to perform the proper normalization and class ID replacement in python.
+Further information can be found in the [UI Generator v1 README](./lvgl_ui_generator/README.md).
 
-The generated UI places randomly chosen widgets from the provided widget list. The supported widget list is currently limited to the following: 
-_(the names to the left are valid arguments for the generator, the right ones are the LVGL widget names)_
-- `button` -> `lv_btn`
-- `switch` -> `lv_switch`
-- `slider` -> `lv_slider`
-- `checkbox` -> `lv_checkbox`	
-- `label` -> `lv_label`
-- `progressbar` -> `lv_bar`
+## LVGL UI Generator (Version 2)
 
-The generated label `*.txt` file follows the YOLO format for the bounding boxes. 
-_(YOLO format: `<label> <x_center> <y_center> <width> <height>`, values are in pixels)_
-This information can later be used to build a dataset for training the model when processed with the UI randomizer.
+Version 2 of the LVGL UI Generator is an updated version of the UI generator that uses micropython and corresponding LVGL bindings as a base. This version is more flexible, easier to use and more maintenable than the original version.
 
-### Usage
+It has two modes of operation:
+- **Random mode**: Generates a random UI with a specified number of widgets placed on a white background. It requires a provided list of widget types to randomly choose from.
+- **Design mode**: Generates a UI based on a provided JSON design file. The design file describes the whole window, including styles, widgets and certain properties. There is a special `random` widget, which can be used to randomize widget creation in certain areas of the design. This mode is useful in creating more realistic looking user interfaces, as the random mode does not accomodate for styles regarding the containers.
 
-To use the Random UI Generator, open a terminal or command-line interface and navigate to the directory containing the binary. Use the following command structure:
+Further information about usage and setup can be found in the [UI Generator v2 README](./lvgl_ui_generator_v2/README.md).
 
-`./random_ui_generator [options]`
+## UI Randomizer
 
-#### Options
+The UI Randomizer is a python script module which uses the UI generator to create multiple UI screenshots with annotations in a single CLI interface. The output is organized into a dataset in YOLO format for training the model. Additionally, the script can handle uploading of these manually created datasets to [ClearML](https://clear.ml/), if the specific `clearml` options are provided in the CLI.
 
-    -w <width>: (Required) Width of the UI screenshot in pixels.
-    -h <height>: (Required) Height of the UI screenshot in pixels.
-    -c <widget_count>: (Required) Number of widgets to include in the UI.
-    -t <widget_types>: (Required) Comma-separated list of widget types to include (e.g., button,slider).
-    -o <output_file>: (Required) Path to save the generated screenshot.
-        Must be prefixed with /.
-        Annotations will be saved in a .txt file with the same name.
-    -d <screenshot_delay>: Delay in seconds before capturing the screenshot. Useful for ensuring UI rendering is complete.
-    -l <layout>: Layout option for arranging widgets (optional).
+Further information can be found in the [UI Randomizer README](./ui_randomizer/README.md).
 
-#### Example
+## UI Detector
 
-To generate a UI with a width of 500 pixels, height of 500 pixels, containing 3 widgets of types button and slider, with an absolute layout, and saving the output to ui_output.jpg with a delay of 5000 milliseconds, the command would be:
+The UI Detector is a repository containing multiple scripts for generating datasets, training the YOLOv8 Model and hyperparameter optimization. **This repository is the main focus of the project.** It relies heavily on the usage of ClearML for experiment tracking, model optimization and dataset versioning.
 
-`./random_ui_generator -w 500 -h 500 -c 3 -t button,slider -o /ui_output.jpg -d 5 -l none`
-
-### Known issues
-
-- The generator currently will always crash in a SEGFAULT when exiting the program. For now it is fine since it correctly generates the screenshot and the label file. The crash occurs during de-initialization of the UI due to an already missing image for the application. I believe it is due to the mouse cursor icon when using X11. I have not yet found a way to fix it.
-- Due to the failed de-initialization, the generator will leak memory and sometimes will fail on multiple runs. Retrying usually fixes the issue. Rerunning the generator multiple times in a row will however clog up memory and possibly cause issues that come with that effect.
-- The memory of the LVGL driver is currently set to `(2048U * 2048U)`. The main window size in which the screenshot container is placed is 1024x800. Any image sizes that either exceed this memory limitation or exceed the window size will cause the generator to crash. In general, if causing issues, this can be changed in `lv_conf.h` and `lv_demo_conf.h` respectively.
-
-----
-
-## The UI randomizer
-
-The UI randomizer is a python script that leverages the binary of the UI generator, and uses it to generate multiple random UI in sequence. 
-
-It is helpful in making the generator much more user-friendly, since it can be used to generate a large number of UIs with a single command, without having to repeatedly run the generator manually.
-
-Since the label data from the generator still needs to be normalized, the randomizer will pre-process the annotation files and place the data in the correct folder structure for training the model.
-
-### Usage
-`python ui_capture.py [arguments]`
-
-#### Arguments
-
-The script accepts several arguments to customize the dataset generation:
-
-    -p or --app_path: (Required) Path to the random UI generator binary.
-    -i or --iterations: Number of user interface screenshots to generate (default: 10).
-    -t or --widget_types: (Required) List of widget types to be included in the UI. The names of these types must match the naming convention of the generator (e.g. button, checkbox, etc.).
-    --width: Width of the UI screenshot (default: 250).
-    --height: Height of the UI screenshot (default: 250).
-    -o or --output_folder: (Required) Folder path to save the output images.
-    -d or --delay_count: Delay count for UI capture (default: 10).
-    --split_widgets: Option to split widgets into subfolders.
-    -l or --layout: The used layout in the generation:
-        - `none` (randomized absolute positions)
-        - `grid` (randomized cell placement - grid size is the amount widgets squared, e.g. 9x9 for 9 widgets)
-        - `flex` (randomized flexbox placement)
-    -r or --split_ratio: Split ratio for train, validation, and test datasets.
-    -s or --single: Create only a single widget per iteration.
-    -m or --multi: Number of widgets to create per iteration (if multiple).
-
-#### Example
-An example command might look like this:
-
-`python ui_capture.py -p path/to/ui/generator -i 20 -t button checkbox -o path/to/output -d 5 --split_widgets`
-
-The script will generate the UI images and organize them into a dataset placed into the specified output folder. It creates necessary subfolders for images and labels. The script will also automatically pre-process the label data _(i.e. normalize pixel values and replace widget names with class IDs)_.
-
-### Known issues
-
-- The code is not very well written and currently just performs the bare minimum to get the job done. It is not very error-friendly and could use some refactoring.
-
-----
-
-## The model
-
-The base model is the YOLOv8 object detection model. For early testing, the provided weights from the official YOLOv8 image were used. Later, a new base model will be trained using YOLOv8 and a custom generated dataset. This base model will then be fine-tuned with proprietary user interface screenshots.
-
-Code can be found in the [notebook of the root repository](lvgl-ui-detector_yolov8.ipynb). `(lvgl-ui-detector_yolov8.ipynb)`
-
-Other notebooks are still a work in progress and will be updated later but serve as a placeholder for now.
-
-----
+Further information can be found in the [UI Detector README](./ui-detector/README.md).
 
 ## Docker image
 
@@ -141,7 +108,52 @@ A docker image is provided for development purposes. It is derived from the offi
 
 The image can be built using the provided `Dockerfile` in the root directory of the repository. Additionally, there's a [run_container.sh script](./scripts/run_container.sh) provided for convenience in the [scripts](./scripts/) folder.
 
-The script and image currently only serve my development purposes and are not taking any other needs into account.
+The script and image currently only serve development purposes for my own personal use and are not taking any other needs into account.
+
+## VSCode workspace
+
+The project was developed using [Visual Studio Code](https://code.visualstudio.com/). 
+
+The main repository contains the `ui-detector.code-workspace`, which organizes all submodules into seperate workspaces. All deprecated submodules are still included in the workspace, but are commented out to clean up the workspace view.
+
+The workspace file is intended for development purposes and suggests the usage of a few extensions. These included suggestions are generally required to develop the submodules properly.
+
+<details>
+<summary> Required extensions for the workspace</summary>
+
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
+- [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack)
+</details>
+
+I personally use a few more extensions than that and to credit their creators/maintainers, a purely optional list is provided here as well.
+
+<details>
+<summary> Optional extensions for this workspace <i>(in no particular order)</i></summary>
+
+- [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
+- [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
+- [Zotero LaTeX](https://marketplace.visualstudio.com/items?itemName=bnavetta.zoterolatex)
+- [Citation Picker for Zotero](https://marketplace.visualstudio.com/items?itemName=mblode.zotero)
+- [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
+- [LaTeX Utilities](https://marketplace.visualstudio.com/items?itemName=tecosaur.latex-utilities)
+- [Icons for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=tal7aouy.icons)
+- [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot)
+- [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
+- [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
+- [Git History](https://marketplace.visualstudio.com/items?itemName=donjayamanne.githistory)
+- [Local History](https://marketplace.visualstudio.com/items?itemName=xyz.local-history)
+- [MemoryView](https://marketplace.visualstudio.com/items?itemName=mcu-debug.memory-view)
+
+</details>
+
+----
+
+# Author's Note
+
+This project was created for my bachelor thesis at the [University of Applied Sciences Technikum Vienna](https://www.technikum-wien.at/en/).
+
+...and I am tired.
 
 ----
 
@@ -151,8 +163,11 @@ The script and image currently only serve my development purposes and are not ta
 - [x] Create UI randomizer
 - [x] Create model
 - [x] Make model predict the pre-defined widget list
+- [x] Finished Exposé
+- [x] Finished Exposé presentation
 - [ ] Finished bachelor thesis
-- [ ] Didn't catch burn-out syndrome
+- [x] Finished thesis presentation
+- [ ] Did not catch burn-out syndrome
 
 # Feature roadmap
 
