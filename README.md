@@ -175,3 +175,7 @@ This project was created for my bachelor thesis at the [University of Applied Sc
 - [x] Improve dataset size (min. 50 per class) and training process (1-click-pipeline)
 - [x] Add widget customization in generator (color, size, etc.)
 - [x] Add design file system for randomizer & generator
+
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
