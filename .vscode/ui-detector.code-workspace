@@ -8,18 +8,14 @@
             "name": "UI Detector",
             "path": "../ui-detector"
         },
-        // {
-        //     "name": "LVGL UI Generator",
-        //     "path": "../lvgl_ui_generator"
-        // },
+        {
+            "name": "LVGL UI Generator v1",
+            "path": "../lvgl_ui_generator"
+        },
         {
             "name": "LVGL UI Generator v2",
             "path": "../lvgl_ui_generator_v2"
         },
-        // {
-        //     "name": "YOLOv3 Baseline Project",
-        //     "path": "../yolov3_baseline_project"
-        // },
         {
             "name": "UI Randomizer",
             "path": "../ui_randomizer"
@@ -30,6 +26,7 @@
         }
     ],
     "settings": {
+        // Custom excludes to keep the workspace view clean
         "files.exclude": {
             "**/.git": true,
             "**/.svn": true,
@@ -50,25 +47,32 @@
         "makefile.makefilePath": "${workspaceFolder}/lvgl_ui_generator/Makefile",
         "cmake.configureOnOpen": false,
         "latex-workshop.view.pdf.viewer": "tab",
+        // Zotero server must be redirected from WSL2, thus we need some custom URLs and options.
+        // And also this: 
         "remote.localPortHost": "allInterfaces",
         "zotero.serverUrl": "http://172.20.128.1:23119",
         // "latex-utilities.zotero.zoteroUrl": "http://172.20.128.1:23119",
         "zotero-citation-picker.port": "http://172.20.128.1:23119/better-bibtex/cayw?format=pandoc",
-        "files.associations": {
-            "*.robot": "robotframework",
-            "random_design_ui.h": "c"
-        },
         "python.languageServer": "Pylance",
+        // Since those submodules are not my creation, their todos are not of my concern
         "todo-tree.filtering.excludeGlobs": [
             "**/lv_micropython/*/**",
             "**/lvgl/*/**",
-            "**/lv_drivers/*/**",
-            "**/yolov3_baseline_project/*/**",
+            "**/lv_drivers/*/**"
         ],
-        "json.format.enable": false
+        // JSON formatter will always annoyingly format generated designs, comment it out to enable again
+        "json.format.enable": false,
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-vscode.cpptools-extension-pack",
+            "ms-toolsai.jupyter",
+            "ms-python.python"
+        ]
     },
     "launch": {
         "version": "0.2.0",
         "configurations": []
     }
+    // Further settings are configured in the individual workspaces under their .vscode/ directory in corresponding json files.
 }
