@@ -78,7 +78,7 @@ Version 1 of the LVGL UI Generator is a modified version of the LVGL simulator f
 
 When launched with the proper arguments, it will open a window with a single container widget of the provided size placed inside. After rendering the UI, it will generate a screenshot of the container and save it to the provided path. It will also generate a text file with the bounding boxes of the placed widgets.
 
-Further information can be found in the [UI Generator v1 README](./lvgl_ui_generator/README.md).
+Further information can be found in the [UI Generator v1 README](https://github.com/HackXIt/lvgl_ui_generator/blob/master/README.md).
 
 ## LVGL UI Generator (Version 2)
 
@@ -88,19 +88,19 @@ It has two modes of operation:
 - **Random mode**: Generates a random UI with a specified number of widgets placed on a white background. It requires a provided list of widget types to randomly choose from.
 - **Design mode**: Generates a UI based on a provided JSON design file. The design file describes the whole window, including styles, widgets and certain properties. There is a special `random` widget, which can be used to randomize widget creation in certain areas of the design. This mode is useful in creating more realistic looking user interfaces, as the random mode does not accomodate for styles regarding the containers.
 
-Further information about usage and setup can be found in the [UI Generator v2 README](./lvgl_ui_generator_v2/README.md).
+Further information about usage and setup can be found in the [UI Generator v2 README](https://github.com/HackXIt/lvgl_ui_generator_v2/blob/main/README.md).
 
 ## UI Randomizer
 
 The UI Randomizer is a python script module which uses the UI generator to create multiple UI screenshots with annotations in a single CLI interface. The output is organized into a dataset in YOLO format for training the model. Additionally, the script can handle uploading of these manually created datasets to [ClearML](https://clear.ml/), if the specific `clearml` options are provided in the CLI.
 
-Further information can be found in the [UI Randomizer README](./ui_randomizer/README.md).
+Further information can be found in the [UI Randomizer README](https://github.com/HackXIt/ui_randomizer/blob/main/README.md).
 
 ## UI Detector
 
 The UI Detector is a repository containing multiple scripts for generating datasets, training the YOLOv8 Model and hyperparameter optimization. **This repository is the main focus of the project.** It relies heavily on the usage of ClearML for experiment tracking, model optimization and dataset versioning.
 
-Further information can be found in the [UI Detector README](./ui-detector/README.md).
+Further information can be found in the [UI Detector README](https://github.com/HackXIt/ui-detector/blob/main/README.md).
 
 ## Docker image
 
