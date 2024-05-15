@@ -1,0 +1,21 @@
+names:
+- arc
+- bar
+- button
+- buttonmatrix
+- calendar
+- checkbox
+- dropdown
+- label
+- led
+- roller
+- scale
+- slider
+- spinbox
+- switch
+- table
+- textarea
+path: /home/rini-debian/git-stash/lvgl-ui-detector/ui-detector/tmp/random
+test: images/test
+train: images/train
+val: images/val
