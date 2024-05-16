@@ -28,17 +28,17 @@ def pull_debug_samples(experiment, experiment_folder, cookie: str = None):
     if mosaic_samples:
         os.makedirs(debug_samples_dir, exist_ok=True)
         for sample in mosaic_samples:
-            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir, cookie=cookie)
     val_labels = experiment.get_debug_samples(title='Validation', series='val_labels.jpg')
     if val_labels:
         os.makedirs(debug_samples_dir, exist_ok=True)
         for sample in val_labels:
-            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir, cookie=cookie)
     val_preds = experiment.get_debug_samples(title='Validation', series='val_preds.jpg')
     if val_preds:
         os.makedirs(debug_samples_dir, exist_ok=True)
         for sample in val_preds:
-            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir, cookie=cookie)
 
 def pull_plots(experiment, experiment_folder, cookie: str = None):
     import json
@@ -62,7 +62,7 @@ def pull_plots(experiment, experiment_folder, cookie: str = None):
                     os.makedirs(image_dir, exist_ok=True)
                     for i, image in enumerate(plot_data['layout']['images']):
                         source_url = image['source']
-                        pull_file(source_url, f"{plot_name}_{i}", image_dir)
+                        pull_file(source_url, f"{plot_name}_{i}", image_dir, cookie=cookie)
                 # Handle Plotly plots
                 elif 'total' in plot['variant'] or plot['variant'] == 'plot':
                     fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
