@@ -1,11 +1,111 @@
 
+def pull_file(url: str, alt_name: str, target_dir: str):
+    import requests
+    import mimetypes
+    import os
+    # NOTE - This is a workaround for downloading files from ClearML. The ClearML SDK does not provide a way to download files directly.
+    # Go to the file URL in your browser, copy the cookies from the request headers, and paste them in the variable.
+    cookie = 'YOUR_COOKIE'
+    req = requests.get(url, allow_redirects=True, headers={'Cookie': cookie.encode()})
+    # print(req.headers)
+    content_type = req.headers['Content-Type']
+    # print(content_type)
+    extension = mimetypes.guess_extension(content_type)
+    if 'Content-Disposition' in req.headers:
+        disposition = req.headers['Content-Disposition']
+        # print(disposition)
+        original_filename = disposition.split('filename=')[-1].strip('"')
+    else:
+        original_filename = alt_name + extension
+    file_path = os.path.join(target_dir, original_filename)
+    with open(file_path, 'wb') as file:
+        file.write(req.content)
+
+def pull_debug_samples(experiment, experiment_folder):
+    import os
+    debug_samples_dir = os.path.join(experiment_folder, 'debug_samples')
+    mosaic_samples = experiment.get_debug_samples(title='Mosaic', series='train.jpg')
+    if mosaic_samples:
+        os.makedirs(debug_samples_dir, exist_ok=True)
+        for sample in mosaic_samples:
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+    val_labels = experiment.get_debug_samples(title='Validation', series='val_labels.jpg')
+    if val_labels:
+        os.makedirs(debug_samples_dir, exist_ok=True)
+        for sample in val_labels:
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+    val_preds = experiment.get_debug_samples(title='Validation', series='val_preds.jpg')
+    if val_preds:
+        os.makedirs(debug_samples_dir, exist_ok=True)
+        for sample in val_preds:
+            pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
+
+def pull_plots(experiment, experiment_folder):
+    import json
+    import plotly.graph_objects as go
+    plots = experiment.get_reported_plots()
+    if plots:
+        plot_dir = os.path.join(experiment_folder, 'plots')
+        os.makedirs(plot_dir, exist_ok=True)
+        for plot in plots:
+            plot_name = plot['metric']
+            plot_json_path = os.path.join(plot_dir, f'{plot_name}.json')
+            with open(plot_json_path, 'w', encoding='utf-8') as f:
+                json.dump(plot, f, ensure_ascii=False, indent=4)
+            plot_data = json.loads(plot['plot_str'])
+            try:
+                # Handle Plotly plots
+                if 'total' in plot['variant']:
+                    fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
+                    fig.write_html(os.path.join(plot_dir, f'{plot_name}.html'))
+                # Handle plot images
+                if 'plot image' in plot['variant']:
+                    image_dir = os.path.join(plot_dir, 'images')
+                    os.makedirs(image_dir, exist_ok=True)
+                    for i, image in enumerate(plot_data['layout']['images']):
+                        source_url = image['source']
+                        pull_file(source_url, f"{plot_name}_{i}", image_dir)
+            except Exception as e:
+                print(f"Failed to save plot {plot_name}\n{plot}\n{e}")
+
+def pull_artifacts(experiment, experiment_folder):
+    import shutil
+    import json
+    import os
+    artifacts_dir = os.path.join(experiment_folder, 'artifacts')
+    artifacts = experiment.artifacts.values()
+    if len(artifacts) > 0:
+        os.makedirs(artifacts_dir, exist_ok=True)
+        for artifact in experiment.artifacts.values():
+            with open(os.path.join(artifacts_dir, f'{artifact.name}.json'), 'w') as f:
+                json.dump(artifact.metadata, f)
+            artifact_dir = artifact.get_local_copy()
+            if os.path.isdir(artifact_dir):
+                shutil.copytree(artifact_dir, os.path.join(artifacts_dir, artifact.name))
+            else:
+                shutil.copy(artifact_dir, artifacts_dir)
+
+def pull_models(experiment, experiment_folder, pull_output: bool = True, pull_input: bool = False):
+    import os
+    import shutil
+    models = experiment.get_models()
+    if models['output'] and pull_output:
+        output_models = os.path.join(experiment_folder, 'output_models')
+        os.makedirs(output_models, exist_ok=True)
+        for model in models['output']:
+            model_dir = model.get_local_copy()
+            shutil.copy(model_dir, output_models)
+    if models['input'] and pull_input:
+        input_models = os.path.join(experiment_folder, 'input_models')
+        os.makedirs(input_models, exist_ok=True)
+        for model in models['input']:
+            model_dir = model.get_local_copy()
+            shutil.copy(model_dir, input_models)
+
 def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folder: str, write_task_name: bool = False):
     from clearml import Task
     import os
-    import shutil
     import json
-    import requests
-    import plotly.graph_objects as go
     experiment = Task.get_task(task_id=experiment_id)
     experiment_dir = f"{experiment_id}_" + experiment_info['name'].replace(' ', '_') if write_task_name else experiment_id
     experiment_folder = os.path.join(output_folder, experiment_dir)
@@ -28,61 +128,19 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
         with open(os.path.join(experiment_folder, 'model_design.txt'), 'w') as f:
             f.write(model_design)
     # Save artifacts
-    artifacts_dir = os.path.join(experiment_folder, 'artifacts')
-    os.makedirs(artifacts_dir, exist_ok=True)
-    for artifact in experiment.artifacts.values():
-        with open(os.path.join(artifacts_dir, f'{artifact.name}.json'), 'w') as f:
-            json.dump(artifact.metadata, f)
-        artifact_dir = artifact.get_local_copy()
-        if os.path.isdir(artifact_dir):
-            shutil.copytree(artifact_dir, os.path.join(artifacts_dir, artifact.name))
-        else:
-            shutil.copy(artifact_dir, artifacts_dir)
-    # Save output models (if available)
-    models = experiment.get_models()
-    if models['output']:
-        output_models = os.path.join(experiment_folder, 'output_models')
-        os.makedirs(output_models, exist_ok=True)
-        for model in models['output']:
-            model_dir = model.get_local_copy()
-            shutil.copy(model_dir, output_models)
+    pull_artifacts(experiment, experiment_folder)
     # Save console output
     output = experiment.get_reported_console_output(10000)
     with open(os.path.join(experiment_folder, 'output.txt'), 'w') as f:
         f.writelines(output)
-    # Save plots
-    plot_data = experiment.get_reported_plots()
-    plot_dir = os.path.join(experiment_folder, 'plots')
-    os.makedirs(plot_dir, exist_ok=True)
-    for plot in plot_data:
-        plot_name = plot['metric']
-        with open(os.path.join(plot_dir, f'{plot_name}.json'), 'w') as f:
-            json.dump(plot, f)
-        plot_data = json.loads(plot['plot_str'])
-        fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
-        fig.write_html(os.path.join(plot_dir, f'{plot_name}.html'))
-        if 'source' not in plot:
-            continue
-        req = requests.get(plot['source'], allow_redirects=True)
-        open(os.path.join(plot_dir, f'{plot_name}.png'), 'wb').write(req.content)
-    # Save debug samples
-    debug_samples_dir = os.path.join(experiment_folder, 'debug_samples')
-    os.makedirs(debug_samples_dir, exist_ok=True)
-    mosaic_samples = experiment.get_debug_samples(title='Mosaic', series='train.jpg')
-    if mosaic_samples:
-        for sample in mosaic_samples:
-            req = requests.get(sample['url'], allow_redirects=True)
-            open(os.path.join(debug_samples_dir, f"{sample['metric']}_{sample['iter']}_{sample['variant']}"), 'wb').write(req.content)
-    val_labels = experiment.get_debug_samples(title='Validation', series='val_labels.jpg')
-    if val_labels:
-        for sample in val_labels:
-            req = requests.get(sample['url'], allow_redirects=True)
-            open(os.path.join(debug_samples_dir, f"{sample['metric']}_{sample['iter']}_{sample['variant']}"), 'wb').write(req.content)
-    val_preds = experiment.get_debug_samples(title='Validation', series='val_preds.jpg')
-    if val_preds:
-        for sample in val_preds:
-            req = requests.get(sample['url'], allow_redirects=True)
-            open(os.path.join(debug_samples_dir, f"{sample['metric']}_{sample['iter']}_{sample['variant']}"), 'wb').write(req.content)
+    # Save output models, plots, and debug samples if experiment is completed
+    if experiment.get_status() == 'completed':
+        # Save output models (if available)
+        pull_models(experiment, experiment_folder)
+        # Save plots
+        pull_plots(experiment, experiment_folder)
+        # Save debug samples
+        pull_debug_samples(experiment, experiment_folder)
     # Save script info
     script_info = experiment.get_script()
     with open(os.path.join(experiment_folder, 'script_info.json'), 'w') as f:
@@ -122,7 +180,7 @@ if __name__ == '__main__':
     experiments = gather_experiments(args.project)
     os.makedirs(args.output_folder, exist_ok=True)
     for experiment_id, experiment_info in experiments.items():
-        print(f'Pulling data for experiment {experiment_info["name"]} with ID {experiment_id}')
+        print(f'Pulling data for experiment "{experiment_info["name"]}" with ID "{experiment_id}"')
         experiment_folder = pull_experiment_data(experiment_id, experiment_info, args.output_folder, args.write_task_name)
         experiments[experiment_id]['folder'] = experiment_folder
     with open(os.path.join(args.output_folder, 'experiments.json'), 'w') as f:
