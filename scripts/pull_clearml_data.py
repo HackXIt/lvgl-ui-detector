@@ -1,11 +1,11 @@
 
-def pull_file(url: str, alt_name: str, target_dir: str):
+def pull_file(url: str, alt_name: str, target_dir: str, cookie: str = None):
     import requests
     import mimetypes
     import os
     # NOTE - This is a workaround for downloading files from ClearML. The ClearML SDK does not provide a way to download files directly.
     # Go to the file URL in your browser, copy the cookies from the request headers, and paste them in the variable.
-    cookie = 'YOUR_COOKIE'
+    cookie = 'YOUR_COOKIE' if cookie is None else cookie
     req = requests.get(url, allow_redirects=True, headers={'Cookie': cookie.encode()})
     # print(req.headers)
     content_type = req.headers['Content-Type']
@@ -21,7 +21,7 @@ def pull_file(url: str, alt_name: str, target_dir: str):
     with open(file_path, 'wb') as file:
         file.write(req.content)
 
-def pull_debug_samples(experiment, experiment_folder):
+def pull_debug_samples(experiment, experiment_folder, cookie: str = None):
     import os
     debug_samples_dir = os.path.join(experiment_folder, 'debug_samples')
     mosaic_samples = experiment.get_debug_samples(title='Mosaic', series='train.jpg')
@@ -40,7 +40,7 @@ def pull_debug_samples(experiment, experiment_folder):
         for sample in val_preds:
             pull_file(sample['url'], f"{sample['metric']}_{sample['iter']}_{sample['variant']}", debug_samples_dir)
 
-def pull_plots(experiment, experiment_folder):
+def pull_plots(experiment, experiment_folder, cookie: str = None):
     import json
     import plotly.graph_objects as go
     plots = experiment.get_reported_plots()
@@ -50,14 +50,14 @@ def pull_plots(experiment, experiment_folder):
         for plot in plots:
             plot_name = plot['metric']
             # Replace invalid characters in file name
-            plot_name = plot_name.replace('/', '_').replace(':', '_')
+            plot_name = plot_name.replace('/', '_').replace(':', '_').replace('=', '_')
             plot_json_path = os.path.join(plot_dir, f'{plot_name}.json')
             with open(plot_json_path, 'w', encoding='utf-8') as f:
                 json.dump(plot, f, ensure_ascii=False, indent=4)
             plot_data = json.loads(plot['plot_str'])
             try:
                 # Handle Plotly plots
-                if 'total' in plot['variant']:
+                if 'total' in plot['variant'] or 'plot' in plot['variant']:
                     fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
                     fig.write_html(os.path.join(plot_dir, f'{plot_name}.html'))
                 # Handle plot images
@@ -104,7 +104,9 @@ def pull_models(experiment, experiment_folder, pull_output: bool = True, pull_in
             model_dir = model.get_local_copy()
             shutil.copy(model_dir, input_models)
 
-def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folder: str, write_task_name: bool = False, skip_existing: bool = False):
+def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folder: str, 
+                         write_task_name: bool = False, skip_existing: bool = False, cookie: str = None,
+                         pull_output_models: bool = True, pull_input_models: bool = False):
     from clearml import Task
     import os
     import json
@@ -141,11 +143,11 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     # Save output models, plots, and debug samples if experiment is completed
     if experiment.get_status() == 'completed':
         # Save output models (if available)
-        pull_models(experiment, experiment_folder)
+        pull_models(experiment, experiment_folder, pull_output_models, pull_input_models)
         # Save plots
-        pull_plots(experiment, experiment_folder)
+        pull_plots(experiment, experiment_folder, cookie=cookie)
         # Save debug samples
-        pull_debug_samples(experiment, experiment_folder)
+        pull_debug_samples(experiment, experiment_folder, cookie=cookie)
     # Save script info
     script_info = experiment.get_script()
     with open(os.path.join(experiment_folder, 'script_info.json'), 'w') as f:
@@ -182,12 +184,20 @@ if __name__ == '__main__':
     parser.add_argument('--zip', action='store_true', help='Whether to zip the output folder')
     parser.add_argument('--write_task_name', action='store_true', help='Whether to write the task name in the output folder (default is task ID)')
     parser.add_argument('--skip_existing', action='store_true', help='Whether to skip pulling data for experiments that already have a folder in the output folder')
+    parser.add_argument('--cookie', type=str, help='The cookie to use for downloading files from ClearML')
+    parser.add_argument('--pull_output_models', action='store_true', default=True, help='Whether to pull output models')
+    parser.add_argument('--pull_input_models', action='store_true', help='Whether to pull input models')
     args = parser.parse_args()
     experiments = gather_experiments(args.project)
     os.makedirs(args.output_folder, exist_ok=True)
     for experiment_id, experiment_info in experiments.items():
         print(f'Pulling data from experiment "{experiment_info["name"]}" with ID "{experiment_id}"')
-        experiment_folder = pull_experiment_data(experiment_id, experiment_info, args.output_folder, args.write_task_name, args.skip_existing)
+        experiment_folder = pull_experiment_data(experiment_id, experiment_info, 
+                                                 args.output_folder, 
+                                                 args.write_task_name, 
+                                                 args.skip_existing, 
+                                                 args.cookie, 
+                                                 args.pull_output_models, args.pull_input_models)
         experiments[experiment_id]['folder'] = experiment_folder
     with open(os.path.join(args.output_folder, 'experiments.json'), 'w') as f:
         json.dump(experiments, f)
