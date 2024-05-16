@@ -163,10 +163,11 @@ This project was created for my bachelor thesis at the [University of Applied Sc
 - [x] Create UI randomizer
 - [x] Create model
 - [x] Make model predict the pre-defined widget list
-- [x] Finished Exposé
-- [x] Finished Exposé presentation
-- [ ] Finished bachelor thesis
-- [x] Finished thesis presentation
+- [x] Finish Exposé
+- [x] Finish Exposé presentation
+- [x] Complete README documentation in all submodules
+- [ ] Finish bachelor thesis
+- [x] Finish thesis presentation
 - [ ] Did not catch burn-out syndrome
 
 # Feature roadmap
