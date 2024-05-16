@@ -49,6 +49,8 @@ def pull_plots(experiment, experiment_folder):
         os.makedirs(plot_dir, exist_ok=True)
         for plot in plots:
             plot_name = plot['metric']
+            # Replace invalid characters in file name
+            plot_name = plot_name.replace('/', '_').replace(':', '_')
             plot_json_path = os.path.join(plot_dir, f'{plot_name}.json')
             with open(plot_json_path, 'w', encoding='utf-8') as f:
                 json.dump(plot, f, ensure_ascii=False, indent=4)
@@ -102,13 +104,16 @@ def pull_models(experiment, experiment_folder, pull_output: bool = True, pull_in
             model_dir = model.get_local_copy()
             shutil.copy(model_dir, input_models)
 
-def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folder: str, write_task_name: bool = False):
+def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folder: str, write_task_name: bool = False, skip_existing: bool = False):
     from clearml import Task
     import os
     import json
     experiment = Task.get_task(task_id=experiment_id)
     experiment_dir = f"{experiment_id}_" + experiment_info['name'].replace(' ', '_') if write_task_name else experiment_id
     experiment_folder = os.path.join(output_folder, experiment_dir)
+    if skip_existing and os.path.exists(experiment_folder):
+        print(f"Skipping experiment {experiment_id} as folder already exists")
+        return experiment_folder
     os.makedirs(experiment_folder, exist_ok=True)
     # Save reported scalars
     reported_scalars = experiment.get_all_reported_scalars()
@@ -176,12 +181,13 @@ if __name__ == '__main__':
     parser.add_argument('--output_folder', type=str, help='The output folder to save the data to', required=True)
     parser.add_argument('--zip', action='store_true', help='Whether to zip the output folder')
     parser.add_argument('--write_task_name', action='store_true', help='Whether to write the task name in the output folder (default is task ID)')
+    parser.add_argument('--skip_existing', action='store_true', help='Whether to skip pulling data for experiments that already have a folder in the output folder')
     args = parser.parse_args()
     experiments = gather_experiments(args.project)
     os.makedirs(args.output_folder, exist_ok=True)
     for experiment_id, experiment_info in experiments.items():
         print(f'Pulling data from experiment "{experiment_info["name"]}" with ID "{experiment_id}"')
-        experiment_folder = pull_experiment_data(experiment_id, experiment_info, args.output_folder, args.write_task_name)
+        experiment_folder = pull_experiment_data(experiment_id, experiment_info, args.output_folder, args.write_task_name, args.skip_existing)
         experiments[experiment_id]['folder'] = experiment_folder
     with open(os.path.join(args.output_folder, 'experiments.json'), 'w') as f:
         json.dump(experiments, f)
