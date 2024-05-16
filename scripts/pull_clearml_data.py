@@ -56,17 +56,17 @@ def pull_plots(experiment, experiment_folder, cookie: str = None):
                 json.dump(plot, f, ensure_ascii=False, indent=4)
             plot_data = json.loads(plot['plot_str'])
             try:
-                # Handle Plotly plots
-                if 'total' in plot['variant'] or 'plot' in plot['variant']:
-                    fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
-                    fig.write_html(os.path.join(plot_dir, f'{plot_name}.html'))
                 # Handle plot images
-                if 'plot image' in plot['variant']:
+                if plot['variant'] == 'plot image':
                     image_dir = os.path.join(plot_dir, 'images')
                     os.makedirs(image_dir, exist_ok=True)
                     for i, image in enumerate(plot_data['layout']['images']):
                         source_url = image['source']
                         pull_file(source_url, f"{plot_name}_{i}", image_dir)
+                # Handle Plotly plots
+                elif 'total' in plot['variant'] or plot['variant'] == 'plot':
+                    fig = go.Figure(data=plot_data['data'], layout=plot_data['layout'])
+                    fig.write_html(os.path.join(plot_dir, f'{plot_name}.html'))
             except Exception as e:
                 print(f"Failed to save plot {plot_name}\n{plot}\n{e}")
 
@@ -156,7 +156,7 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     tags = experiment.get_tags()
     if tags:
         with open(os.path.join(experiment_folder, 'tags.txt'), 'w') as f:
-            f.writelines(tags)
+            f.write("\n".join(tags))
     parameters = experiment.get_parameters_as_dict(cast=True)
     with open(os.path.join(experiment_folder, 'parameters.json'), 'w') as f:
         json.dump(parameters, f)
