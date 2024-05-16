@@ -180,7 +180,7 @@ if __name__ == '__main__':
     experiments = gather_experiments(args.project)
     os.makedirs(args.output_folder, exist_ok=True)
     for experiment_id, experiment_info in experiments.items():
-        print(f'Pulling data for experiment "{experiment_info["name"]}" with ID "{experiment_id}"')
+        print(f'Pulling data from experiment "{experiment_info["name"]}" with ID "{experiment_id}"')
         experiment_folder = pull_experiment_data(experiment_id, experiment_info, args.output_folder, args.write_task_name)
         experiments[experiment_id]['folder'] = experiment_folder
     with open(os.path.join(args.output_folder, 'experiments.json'), 'w') as f:
