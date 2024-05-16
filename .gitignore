@@ -7,6 +7,7 @@ dataset
 datasets
 runs
 tmp.sh
+*.drawio.bkp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
