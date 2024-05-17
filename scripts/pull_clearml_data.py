@@ -96,6 +96,9 @@ def pull_models(experiment, experiment_folder, pull_output: bool = True, pull_in
         os.makedirs(output_models, exist_ok=True)
         for model in models['output']:
             model_dir = model.get_local_copy()
+            if type(model_dir) is not str:
+                print(f"Failed to get local copy of model {model.id}")
+                continue
             shutil.copy(model_dir, output_models)
     if models['input'] and pull_input:
         input_models = os.path.join(experiment_folder, 'input_models')
@@ -129,6 +132,10 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     configuration = experiment.get_configuration_objects()
     with open(os.path.join(experiment_folder, 'configuration.json'), 'w') as f:
         json.dump(configuration, f)
+    # Save task configuration
+    task_configuration = experiment.get_configuration()
+    with open(os.path.join(experiment_folder, 'task_configuration.json'), 'w') as f:
+        json.dump(task_configuration, f)
     # Save model design (if available)
     model_design = experiment.get_model_design()
     if model_design:
