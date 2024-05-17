@@ -1,3 +1,10 @@
+from datetime import date, datetime
+
+def json_serial(obj): # NOTE Src: https://stackoverflow.com/a/22238613
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 def pull_file(url: str, alt_name: str, target_dir: str, cookie: str = None):
     import requests
@@ -53,7 +60,7 @@ def pull_plots(experiment, experiment_folder, cookie: str = None):
             plot_name = plot_name.replace('/', '_').replace(':', '_').replace('=', '_')
             plot_json_path = os.path.join(plot_dir, f'{plot_name}.json')
             with open(plot_json_path, 'w', encoding='utf-8') as f:
-                json.dump(plot, f, ensure_ascii=False, indent=4)
+                json.dump(plot, f, ensure_ascii=False, indent=4, sort_keys=True)
             plot_data = json.loads(plot['plot_str'])
             try:
                 # Handle plot images
@@ -80,7 +87,7 @@ def pull_artifacts(experiment, experiment_folder):
         os.makedirs(artifacts_dir, exist_ok=True)
         for artifact in experiment.artifacts.values():
             with open(os.path.join(artifacts_dir, f'{artifact.name}.json'), 'w') as f:
-                json.dump(artifact.metadata, f)
+                json.dump(artifact.metadata, f, indent=4, sort_keys=True)
             artifact_dir = artifact.get_local_copy()
             if os.path.isdir(artifact_dir):
                 shutil.copytree(artifact_dir, os.path.join(artifacts_dir, artifact.name))
@@ -123,19 +130,16 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     # Save reported scalars
     reported_scalars = experiment.get_all_reported_scalars()
     with open(os.path.join(experiment_folder, 'reported_scalars.json'), 'w') as f:
-        json.dump(reported_scalars, f)
+        json.dump(reported_scalars, f, indent=4, sort_keys=True)
     # Save last metrics
     last_metrics = experiment.get_last_scalar_metrics()
     with open(os.path.join(experiment_folder, 'last_metrics.json'), 'w') as f:
-        json.dump(last_metrics, f)
-    # Save configuration
-    configuration = experiment.get_configuration_objects()
-    with open(os.path.join(experiment_folder, 'configuration.json'), 'w') as f:
-        json.dump(configuration, f)
-    # Save task configuration
+        json.dump(last_metrics, f, indent=4, sort_keys=True)
+    # Save configuration (task configuration)
     task_configuration = experiment.export_task()
+    keys_to_convert = ['created', 'started', 'completed', 'last_update', 'last_change']
     with open(os.path.join(experiment_folder, 'task_configuration.json'), 'w') as f:
-        json.dump(task_configuration, f)
+        json.dump(task_configuration, f, indent=4, sort_keys=True, default=json_serial)
     # Save model design (if available)
     model_design = experiment.get_model_design()
     if model_design:
@@ -158,7 +162,7 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     # Save script info
     script_info = experiment.get_script()
     with open(os.path.join(experiment_folder, 'script_info.json'), 'w') as f:
-        json.dump(script_info, f)
+        json.dump(script_info, f, indent=4, sort_keys=True)
     # Save tags and parameters
     tags = experiment.get_tags()
     if tags:
@@ -166,7 +170,7 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
             f.write("\n".join(tags))
     parameters = experiment.get_parameters_as_dict(cast=True)
     with open(os.path.join(experiment_folder, 'parameters.json'), 'w') as f:
-        json.dump(parameters, f)
+        json.dump(parameters, f, indent=4, sort_keys=True)
     return experiment_dir
 
 def gather_experiments(project: str = "LVGL UI Detector"):
@@ -207,7 +211,7 @@ if __name__ == '__main__':
                                                  args.pull_output_models, args.pull_input_models)
         experiments[experiment_id]['folder'] = experiment_folder
     with open(os.path.join(args.output_folder, 'experiments.json'), 'w') as f:
-        json.dump(experiments, f)
+        json.dump(experiments, f, indent=4, sort_keys=True)
     if args.zip:
         shutil.make_archive(args.output_folder, 'zip', args.output_folder)
         shutil.rmtree(args.output_folder)
