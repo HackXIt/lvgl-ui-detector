@@ -133,7 +133,7 @@ def pull_experiment_data(experiment_id: str, experiment_info: dict, output_folde
     with open(os.path.join(experiment_folder, 'configuration.json'), 'w') as f:
         json.dump(configuration, f)
     # Save task configuration
-    task_configuration = experiment.get_configuration()
+    task_configuration = experiment.export_task()
     with open(os.path.join(experiment_folder, 'task_configuration.json'), 'w') as f:
         json.dump(task_configuration, f)
     # Save model design (if available)
