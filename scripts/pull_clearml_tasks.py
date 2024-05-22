@@ -89,6 +89,9 @@ def pull_artifacts(experiment, experiment_folder):
             with open(os.path.join(artifacts_dir, f'{artifact.name}.json'), 'w') as f:
                 json.dump(artifact.metadata, f, indent=4, sort_keys=True)
             artifact_dir = artifact.get_local_copy()
+            if artifact_dir is None:
+                print(f"Failed to get local copy of artifact {artifact.name}")
+                continue
             if os.path.isdir(artifact_dir):
                 shutil.copytree(artifact_dir, os.path.join(artifacts_dir, artifact.name))
             else:
