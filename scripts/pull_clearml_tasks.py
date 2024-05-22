@@ -50,6 +50,7 @@ def pull_debug_samples(experiment, experiment_folder, cookie: str = None):
 def pull_plots(experiment, experiment_folder, cookie: str = None):
     import json
     import plotly.graph_objects as go
+    import os
     plots = experiment.get_reported_plots()
     if plots:
         plot_dir = os.path.join(experiment_folder, 'plots')
