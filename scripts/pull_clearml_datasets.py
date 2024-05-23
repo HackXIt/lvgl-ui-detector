@@ -13,10 +13,11 @@ def pull_dataset_data(dataset_id: str, dataset_info: dict, output_folder: str,
         return dataset_folder
     dataset = Dataset.get(dataset_id=dataset_id)
     os.makedirs(dataset_folder, exist_ok=True)
-    # Save dataset content
-    save_dir = dataset.get_local_copy()
-    if save_dir is not None:
-        shutil.copytree(save_dir, os.path.join(dataset_folder, 'content'))
+    # Save dataset content (if finalized)
+    if dataset.is_final():
+        save_dir = dataset.get_local_copy()
+        if save_dir is not None:
+            shutil.copytree(save_dir, os.path.join(dataset_folder, 'content'))
     # Save dependency graph
     dependency_graph = dataset.get_dependency_graph()
     with open(os.path.join(dataset_folder, 'dependency_graph.json'), 'w') as f:
