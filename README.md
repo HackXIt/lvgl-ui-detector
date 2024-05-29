@@ -151,9 +151,11 @@ I personally use a few more extensions than that and to credit their creators/ma
 
 # Author's Note
 
-This project was created for my bachelor thesis at the [University of Applied Sciences Technikum Vienna](https://www.technikum-wien.at/en/).
+This project was created for my bachelor thesis at the [University of Applied Sciences Technikum Vienna](https://www.technikum-wien.at/en/). The thesis is titled "Precision at Pixel Level: You only live once doing UI test automation" and is available here: [Thesis](./doc/Thesis_Precision_at_Pixel_Level__You_only_live_once_doing_UI_test_automation-Release-signed.pdf)
 
-...and I am tired.
+## Rationale for the Title
+
+The subtitle _"You Only Live Once Doing UI Test Automation"_ is a thoughtful homage to the _You-only-look-once_ model, which is utilized for its efficiency and accuracy in real-time object detection. In the context of this research, it underscores the critical importance of precision in UI test automation for nurse call systems. The phrase "You Only Live Once" conveys the idea that in high-stakes environments, such as healthcare, there is little room for error. This highlights the necessity for accurate and reliable testing methodologies to ensure system robustness and reliability, effectively communicating that getting it right the first time is paramount.
 
 ----
 
@@ -166,9 +168,10 @@ This project was created for my bachelor thesis at the [University of Applied Sc
 - [x] Finish Exposé
 - [x] Finish Exposé presentation
 - [x] Complete README documentation in all submodules
-- [ ] Finish bachelor thesis
+- [x] Finish bachelor thesis
 - [x] Finish thesis presentation
-- [ ] Did not catch burn-out syndrome
+- [x] Add API documentation
+- [x] Did not catch burn-out syndrome
 
 # Feature roadmap
 
